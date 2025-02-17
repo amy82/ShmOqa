@@ -14,6 +14,7 @@ CBaseThread::CBaseThread()
 	m_bWorking = false;
 	m_bPause = false;
 	m_hThread = NULL;
+	ThreadForceStop = false;		//init
 	m_nThreadID = 0;
 }
 
@@ -53,7 +54,7 @@ bool CBaseThread::StartThread()
 	}
 
 	m_bWorking = true;
-	
+	ThreadForceStop = false;		//StartThread
 	if (::AfxBeginThread(ThreadFunc, (LPVOID)this) == NULL)
 	{
 		m_bWorking = false;
@@ -62,7 +63,23 @@ bool CBaseThread::StartThread()
 	
 	return true;
 }
+bool CBaseThread::GetThreadRunning()
+{
+	if (m_hThread != NULL || m_bWorking)
+	{
+		if (::WaitForSingleObject(m_hThread, 100) == WAIT_TIMEOUT)
+		{
+			return true;	//thread Run....
+		}
+		return true;//thread Run....
+	}
+	return false;
+}
 
+bool CBaseThread::GetForceStop()
+{
+	return ThreadForceStop;
+}
 //-----------------------------------------------------------------------------
 //
 //
@@ -80,6 +97,10 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 
 	while (pThread->m_bWorking == true)
 	{
+		if (pThread->ThreadForceStop)
+		{
+			break;
+		}
 		if (PeekMessage(&stMessage, NULL, 0, 0, PM_NOREMOVE) != 0)
 		{
 			if (GetMessage(&stMessage, NULL, 0, 0) == -1)
@@ -107,7 +128,7 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 
 	pThread->m_hThread = NULL;
 	pThread->m_bWorking = false;
-
+	//TRACE(_T("\n ThreadFunc Exit Type: %s\n"), typeid(*pThread).name());
 	::AfxEndThread(0, TRUE);
 
 	return TRUE;
@@ -120,36 +141,9 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 //-----------------------------------------------------------------------------
 void CBaseThread::EndThread()
 {
-	if (m_bWorking == false)
-	{
-		return;
-	}
-
-	m_bWorking = false;
 	m_bPause = false;
-
-	if (::WaitForSingleObject(m_hThread, 300) == WAIT_TIMEOUT)
-	{
-		return;
-	}
-}
-
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-void CBaseThread::PumpPendingMessage()
-{
-	if (m_bWorking == false)
-	{
-		return;
-	}
-
-	if (::PostThreadMessage(m_nThreadID, WM_PAINT, NULL, NULL) == FALSE)
-	{
-		TRACE("PostThreadMessage() Fail\n");
-	}
+	ThreadForceStop = true;		//EndThread
+								//m_bWorking = false;		//쓰레드 while 빠져나가면 종료되게 주석처리
 }
 
 //-----------------------------------------------------------------------------

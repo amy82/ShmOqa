@@ -153,3 +153,9 @@ void CActiveAlignThread::ThreadCallBack()
 	}
 }
 
+
+//if (g_pCarAABonderDlg->m_clActiveAlignThread[m_nUnit].GetForceStop() == true)
+//{
+//	TRACE(_T("TestProcess------GetForceStop Call: %d\n"), 0);
+//	break; // Á¾·á
+//}

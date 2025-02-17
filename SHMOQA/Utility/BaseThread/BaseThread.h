@@ -24,8 +24,9 @@ public:
 
 	bool StartThread();
 	void EndThread();
-	void PumpPendingMessage();
-	bool GetThreadRunning(){ return m_bWorking; };
+
+	bool GetForceStop();
+	bool GetThreadRunning();		// { return m_bWorking; };
 	void SetThreadPause(bool bPause){ if(m_bWorking == true) m_bPause = bPause; };
 	bool GetThreadPause(){ return m_bPause; };
 private:
@@ -36,6 +37,7 @@ private:
 	bool m_bPause;
 	HANDLE m_hThread;
 	DWORD m_nThreadID;
+	bool ThreadForceStop;
 
 protected:
 	DECLARE_MESSAGE_MAP()

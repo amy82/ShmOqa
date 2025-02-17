@@ -1,3 +1,12 @@
+.vs/
+ipch/
+*.ipch
+.x64/
+**/x64/
+**/Library/lib64/
+SHM_OQA.VC.db
+SHMEOL.VC.VC.opendb
+
 # Prerequisites
 *.d
 

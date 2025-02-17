@@ -6,6 +6,7 @@ ipch/
 **/Library/lib64/
 SHM_OQA.VC.db
 SHMEOL.VC.VC.opendb
+SHM_OQA.VC.VC.opendb
 
 # Prerequisites
 *.d

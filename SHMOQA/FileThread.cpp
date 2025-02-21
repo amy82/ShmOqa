@@ -39,7 +39,6 @@ void CFileThread::TheradDestructor()
 //-----------------------------------------------------------------------------
 void CFileThread::ThreadCallBack()
 {
-#if  (RIVIAN___MODE__CH == ON______EOL_MODE)
 	// 300ms 마다 표시
 	if ((GetTickCount() - m_dwTickCount) > 43200000)	//1시간 = 3600 , 12시간 43200
 	{
@@ -47,7 +46,7 @@ void CFileThread::ThreadCallBack()
 
 		RawDataDelete(0);
 	}
-#endif
+
 }
 
 //-----------------------------------------------------------------------------

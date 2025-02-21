@@ -856,20 +856,7 @@ void CAutoInspDlg::InitializeService()
 	g_clDioControl.ReadByteOut(1, 3);
 	
 	
-#if  (RIVIAN___MODE__CH == ON______EOL_MODE)
-	int offset = 8;		// DIO_OUT_PCB_VACUUM_ON
-	int nrtn = g_clDioControl.ReadBitIn(1, offset);	//»Ì¬¯ , ≈ª¬¯ OUT Ω≈»£ »Æ¿Œ
 
-	if (nrtn == 1)	//DIO_OUT_PCB_VACUUM_ON : ON ªÛ≈¬
-	{
-		g_clDioControl.Stop_Button_LedOn(UNIT_AA1, true);
-	}
-	else if (nrtn == 0)	//DIO_OUT_PCB_VACUUM : OFF ªÛ≈¬
-	{
-		g_clDioControl.Stop_Button_LedOn(UNIT_AA1, false);
-	}
-
-#else
 	int offset = 6;		// EZDIO_OUT_VACUUM_ON
 	int nrtn = g_clDioControl.eZiReadOut(0, offset);	//»Ì¬¯ , ≈ª¬¯ OUT Ω≈»£ »Æ¿Œ
 	if (nrtn == 1)
@@ -880,7 +867,7 @@ void CAutoInspDlg::InitializeService()
 	{
 		g_clDioControl.EziVacuumBtnLedOn(UNIT_AA1, false);
 	}
-#endif
+
 	//SetTimer(WM_UI_CM_TIMER, 200, NULL);
     //AddLog(_T("[INFO] º≠∫ÒΩ∫ √ ±‚»≠ øœ∑·"), 0, 999);
 
@@ -1418,11 +1405,10 @@ void CAutoInspDlg::InitCtrl()
         m_clColorStaticTitle[i].SetTextColor(RGB_COLOR_WHITE);
         m_clColorStaticTitle[i].SetFont(&m_clFontBig);
         m_clColorStaticTitle[i].SetWindowText(DEF_TITLE);*/
-#if  (RIVIAN___MODE__CH == ON_OQA_MODE)		//title color
+
 		m_clColorStaticVersion[i].SetBkColor(RGB(20, 20, 145));
-#else
-		m_clColorStaticVersion[i].SetBkColor(RGB_CTRL_BG);
-#endif
+
+
         
         m_clColorStaticVersion[i].SetTextColor(RGB_COLOR_WHITE);
         m_clColorStaticVersion[i].SetFontBold(TRUE);

@@ -137,6 +137,12 @@ void CModelList::ModelListLoad()
 	else
 	{
 		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, _T("00000000001"));
+		clModelInfo.m_nNo = 1;
+		m_nCurrentNo = 1;
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, m_szCurrentModel);	// TODO: 모델 없을 경우 하나 추가하기
+		m_clModelList.Add(clModelInfo);
+
+		ModelListSave();
 	}
 }
 

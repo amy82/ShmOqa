@@ -4,6 +4,7 @@ ipch/
 .x64/
 **/x64/
 **/Library/lib64/
+SHMEOL.VC.db
 SHM_OQA.VC.db
 SHMEOL.VC.VC.opendb
 SHM_OQA.VC.VC.opendb

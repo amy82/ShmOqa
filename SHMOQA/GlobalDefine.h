@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-//#define         NORINDA_MODE
+#define         NORINDA_MODE
 //
 //
 //
@@ -99,10 +99,10 @@
 	//#define ON_LINE_MOTOR
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
-	#define ON_LINE_LIGHT
-	#define ON_LINE_CAM
-	#define ON_LINE_MIL
-	#define ON_LINE_GRABBER
+	//#define ON_LINE_LIGHT
+	//#define ON_LINE_CAMs
+	//#define ON_LINE_MIL
+	//#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE

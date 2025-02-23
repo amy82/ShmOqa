@@ -2106,26 +2106,89 @@ int CPcbProcess::OqaAutoEOLFinalSFR(int nStep)
 			AddLog(szLog, 0, m_nUnit);
 		}
 
+		nRetStep = 116300;// 116500;
+
+		break;
+	case 116300:
+		if (nRunOnlineControlState == false)
+		{
+			//Offline 이면 전부 Skip
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Equipment Offline State Apd Pass [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 116500;
+			break;
+		}
+		g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Apd = -1;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Report Send [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
+		g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(LOT_APD_REPORT_10711);
+		nRetStep = 116350;
+
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		break;
+	case 116350:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Apd == 0)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Send Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed_Ack = -1;
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Report Send [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(LOT_PROCESSING_COMPLETED_REPORT_10710);//SEND S6F11
+			nRetStep = 116400;
+
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10711"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -116300;
+			break;
+		}
+
+		break;
+	case 116400:
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		nRetStep = 116450;
+		break;
+	case 116450:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed == 0)
+		{
+			if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed_Ack != 0)
+			{
+				//nack
+				//
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Fail [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				g_ShowMsgPopup(_T("[INFO]"), szLog, RGB_COLOR_RED);
+			}
+			else
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed OK [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+			}
 
 
-		//g_clMesCommunication[m_nUnit].m_dwCycleTactEndTime = GetTickCount();
-		//g_clMesCommunication[m_nUnit].m_dwMesCycleTime = (g_clMesCommunication[m_nUnit].m_dwCycleTactEndTime - g_clMesCommunication[m_nUnit].m_dwCycleTactStartTime) / 1000;		//SEC
+			//0 == OK, ACK
+			nRetStep = 116500;
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10710"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
 
-		nRetStep = 116500;
-		//if (g_clMesCommunication[m_nUnit].MesEolSave(m_nUnit) == false)//mes 저장
-		//{
-		//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] MES SAVE FAIL! \n통신상태,LOT 확인바랍니다[STEP : %d]"), nStep);
-		//	AddLog(szLog, 1, m_nUnit, true);
-		//	nRetStep = -116000;
-		//	break;
-		//}
-		//else
-		//{
-		//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] MES SAVE COMPLETE! [STEP : %d]"), nStep);
-		//	AddLog(szLog, 0, m_nUnit, false);
+			nRetStep = -116300;
+			break;
+		}
 
-		//	nRetStep = 116500;
-		//}
 		break;
 
 	case 116500:

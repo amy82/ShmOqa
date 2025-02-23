@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-#define         NORINDA_MODE
+//#define         NORINDA_MODE
 //
 //
 //
@@ -27,7 +27,7 @@
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250222_1")			//hp move1
+#define				VER_STR										_T("250223_1")			//oqa apd report 빠져서 추가 #2
 //#define				VER_STR										_T("250221_1")				//home, 이미지 저장 기간 확인필요
 //#define			VER_STR										_T("250217_1")				//레시지 create , 변경, SET_VALUE S7F27 수정
 //#define			VER_STR										_T("241022_1")			//mes적용, raw 제대로 남는지 확인필요
@@ -99,10 +99,10 @@
 	//#define ON_LINE_MOTOR
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
-	//#define ON_LINE_LIGHT
-	//#define ON_LINE_CAMs
-	//#define ON_LINE_MIL
-	//#define ON_LINE_GRABBER
+	#define ON_LINE_LIGHT
+	#define ON_LINE_CAM
+	#define ON_LINE_MIL
+	#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE

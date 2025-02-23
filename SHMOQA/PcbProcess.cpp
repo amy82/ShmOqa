@@ -985,6 +985,46 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 	switch (nStep)
 	{
 	case 30000:
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote)
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+			CTime cTime = CTime::GetCurrentTime();
+			CString strData;
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				cTime.GetYear(),
+				cTime.GetMonth(),
+				cTime.GetDay(),
+				cTime.GetHour(),
+				cTime.GetMinute(),
+				cTime.GetSecond());
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
+		else
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Process Control State:%d [STEP : %d]"), g_clMesCommunication[m_nUnit].m_dEqupControlState[1], nStep);
+			AddLog(szLog, 0, m_nUnit);
+		}
+		nRetStep = 30010;
+		break;
+	case 30010:
 		mOcLightChannel = 1;	//channel init
 
 		g_clTaskWork[m_nUnit].m_ContactCount = 0;		//step 30000
@@ -1115,6 +1155,18 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 		}
 		break;
 	case 30125:
+		if (g_pCarAABonderDlg->LgitLicenseCheck() == false)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] LGIT License 인식 실패 [STEP : %d]"), nStep);
+
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30125;
+			break;
+		}
+		nRetStep = 30130;
+		break;
+	case 30130:
 		if (g_clDioControl.EziPcbCheck(m_nUnit) == false)
 		{
 			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1012);
@@ -1122,7 +1174,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 
 			AddLog(szLog, 1, m_nUnit, true);
 
-			nRetStep = -30120;
+			nRetStep = -30130;
 			break;
 		}
 		else

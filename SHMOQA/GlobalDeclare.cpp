@@ -414,7 +414,7 @@ void AddLog(CString str, int mPopupShow, int nUnit, bool buzzer)
 	if (buzzer == true)
 	{
 		g_ShowMsgPopup(_T("ERROR"), str, RGB_COLOR_RED);
-		g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+		g_clDioControl.SetBuzzer(true);
 		_stprintf_s(sMsg, SIZE_OF_1K, _T("#AA%d@ALARM&ERR$"), (nUnit + 1));
 
 		g_pCarAABonderDlg->SendDataToAAMain(nUnit, sMsg);

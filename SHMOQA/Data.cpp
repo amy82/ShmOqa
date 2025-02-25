@@ -194,14 +194,14 @@ void CModelList::xmlRecipeCreate(CString copyPPid, CString createPPid)
 	folderPath.Format(_T("%s"), BASE_RECIPE_PATH);
 
 	CFileFind finder;
-	CString searchPattern = folderPath + _T("\\*.xml");
+	CString searchPattern = folderPath + _T("\\*.ini");//_T("\\*.xml");
 	CString createFileFullPath;// = finder.GetFilePath();	//.xml 포함
 
-	createFileFullPath.Format(_T("%s\\%s.xml"), folderPath, createPPid);
+	createFileFullPath.Format(_T("%s\\%s.ini"), folderPath, createPPid);//createFileFullPath.Format(_T("%s\\%s.xml"), folderPath, createPPid);
 
 	BOOL bWorking = finder.FindFile(searchPattern);
 
-	m_vRecipeVec.clear();
+	//m_vRecipeVec.clear();		//왜?
 	int cnt = 0;
 	while (bWorking)
 	{
@@ -241,11 +241,11 @@ void CModelList::xmlRecipeDelete(CString PPid)
 	folderPath.Format(_T("%s"), BASE_RECIPE_PATH);
 
 	CFileFind finder;
-	CString searchPattern = folderPath + _T("\\*.xml");
+	CString searchPattern = folderPath + _T("\\*.ini");//_T("\\*.xml");
 
 	BOOL bWorking = finder.FindFile(searchPattern);
 
-	m_vRecipeVec.clear();
+	//m_vRecipeVec.clear();		//왜?
 	int cnt = 0;
 	while (bWorking)
 	{
@@ -264,6 +264,16 @@ void CModelList::xmlRecipeDelete(CString PPid)
 				TCHAR szLog[SIZE_OF_1K];
 				if (bRtn)
 				{
+					int cnt = m_vRecipeVec.size();
+					for (int i = 0; i < cnt; ++i)
+					{
+						if (m_vRecipeVec[i].c_str() == PPid)  // CModelInfo의 == 연산자가 정의되어 있어야 합니다.
+						{
+							m_vRecipeVec.erase(m_vRecipeVec.begin() + i);
+							break;
+						}
+					}
+
 					_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO]%s-Delete ok"), fileFullPath);
 					AddLog(szLog, 0, 0);
 				}

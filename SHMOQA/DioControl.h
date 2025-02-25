@@ -46,7 +46,7 @@ public:
 public:
 	int GetDoorState();
 	bool SetTowerLamp(int nType, bool bOn);
-	bool SetBuzzer(int nType);
+	bool SetBuzzer(bool nType);
 	bool DoorUnLock(int index, bool flag);
 	bool GetDoorUnLockState();
 public:
@@ -96,7 +96,6 @@ public:
 
 public:
 
-	bool SetBuzzer(bool bOn, int nType = 3);
 
 	bool EpoxyDischargeOn(int nUnit, bool bFlag, bool bWait = false);	//EPOXY µµÆ÷
 

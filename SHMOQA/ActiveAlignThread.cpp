@@ -84,7 +84,7 @@ void CActiveAlignThread::ThreadCallBack()
 			if (g_clMesCommunication[m_nUnit].m_bLgit_Pause_req == true)
 			{
 				g_clMesCommunication[m_nUnit].m_bLgit_Pause_req = false;	//thread
-				g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+				g_clDioControl.SetBuzzer(true);
 				//S6F11 Process State Change Report (EXECUTING)
 				g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
 				g_clMesCommunication[m_nUnit].m_dProcessState[1] = ePAUSE;

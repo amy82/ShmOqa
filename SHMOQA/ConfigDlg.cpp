@@ -3615,10 +3615,13 @@ void CConfigDlg::GetData()
 	//idle reason report
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_IDLE_REPORT_PASS);
 	if (pButton->GetCheck() == 1)
+	{
 		g_clModelData[m_nUnit].m_nIdleReasonPass = 1;
+	}
 	else
+	{
 		g_clModelData[m_nUnit].m_nIdleReasonPass = 0;
-
+	}
 	// 공용차트 사용 모드 (패턴)
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_COMPL_MODE);
 	if (pButton->GetCheck() == 1)

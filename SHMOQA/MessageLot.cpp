@@ -299,7 +299,7 @@ void CMessageLot::OnShowWindow(BOOL bShow, UINT nStatus)
 		if (nBuzzerOnType == 1)
 		{
 			//buzzer on
-			g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+			g_clDioControl.SetBuzzer(true);
 		}
 	}
 	else
@@ -308,7 +308,7 @@ void CMessageLot::OnShowWindow(BOOL bShow, UINT nStatus)
 		if (nBuzzerOnType == 1)
 		{
 			//buzzer off
-			g_clDioControl.SetBuzzer(true, BUZZER_OFF);
+			g_clDioControl.SetBuzzer(false);
 		}
 	}
 }

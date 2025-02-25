@@ -345,12 +345,6 @@ void CMainDlg::ModelListDataSet()
 }
 void CMainDlg::InitIdleReasonSet()
 {
-	int i = 0;
-	for (i = 0; i < 1; i++)
-	{
-
-
-	}
 	//비가동 사유 콤보 박스 추가하기
 }
 //----------------------------------------------------------------------------- 
@@ -848,6 +842,12 @@ void CMainDlg::setControlState(int state)
 
 	m_clColorButtonMainControlOfflineReq.state = 0;
 	m_clColorButtonMainControlOnlineRemoteReq.state = 0;
+
+	if (state == -1 && g_pCarAABonderDlg->m_clUbiGemDlg.UbiGemInit == false)
+	{
+		g_ShowMsgPopup(_T("ERROR"), _T("MES DISCONNECTED"), RGB_COLOR_RED);
+		g_clDioControl.SetBuzzer(true);
+	}
 	switch (state)
 	{
 	case 1:
@@ -1183,7 +1183,7 @@ void CMainDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		m_clComboRecipeId.SetCurSel(currentRecipeNo);
 
 		//
-		m_edtAbortLot.SetWindowTextA(g_clTaskWork[m_nUnit].m_szChipID);
+		
 		m_edtMaterialId.SetWindowTextA(g_clReportData.rMaterial_Id_Confirm.MaterialId);
 		ShowGridData();
 
@@ -1241,6 +1241,7 @@ void CMainDlg::OnBnClickedButtonMainRecipeSave()
 		AddLog(szLog, 0, 0);
 		return;
 	}
+
 	if (ppIndex == 0)
 	{
 		_stprintf_s(szLog, SIZE_OF_1K, _T("Recipe no Change"));
@@ -1287,6 +1288,8 @@ void CMainDlg::OnBnClickedButtonMainRecipeSave()
 	g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_PROGRAM_STATE_CHANGED_REPORT_10601, sData);	//--------Save Button
 
 
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[Info] Recipe Parameter Save Completed"));
+	AddLog(szLog, 0, 0);
 
 	sData.Empty();
 	sMsg.Empty();

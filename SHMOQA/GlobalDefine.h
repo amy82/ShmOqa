@@ -22,12 +22,15 @@
 #define  MODEL_OHC_150						32000			//SHM150
 //
 //
-#define ____MACHINE_NAME					MODEL_OHC_150
+#define ____MACHINE_NAME					MODEL_FRONT_100
 
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250224_1")			//case 30000: idle 빠져서 추가
+#define				VER_STR										_T("250225_1")			//lot abord 삭제 , 레시피파일 xml에서 ini파일로 변경
+//#define				VER_STR										_T("250224_3")		//ReadByteOut 삭제
+//#define				VER_STR										_T("250224_2")				//cstring = cstring 대입 사용 금지
+//#define				VER_STR										_T("250224_1")			//case 30000: idle 빠져서 추가
 //#define				VER_STR										_T("250223_1")			//oqa apd report 빠져서 추가 #2
 //#define				VER_STR										_T("250221_1")				//home, 이미지 저장 기간 확인필요
 //#define			VER_STR										_T("250217_1")				//레시지 create , 변경, SET_VALUE S7F27 수정
@@ -100,10 +103,10 @@
 	//#define ON_LINE_MOTOR
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
-	#define ON_LINE_LIGHT
-	#define ON_LINE_CAM
-	#define ON_LINE_MIL
-	#define ON_LINE_GRABBER
+	//#define ON_LINE_LIGHT
+	//#define ON_LINE_CAM
+	//#define ON_LINE_MIL
+	//#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE
@@ -147,17 +150,17 @@
 //
 
 #if (____MACHINE_NAME ==  MODEL_FRONT_100)
-#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_OHC100_OQA")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC100_OQA\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC100_OQA_Alarm")
-#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_OHC100_OQA\\Initialize")
+#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA")
+#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Data")
+#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA_Alarm")
+#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Initialize")
 
 #else
 
-#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_FRONT150_OQA")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT150_OQA\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT150_OQA\\Alarm")
-#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_FRONT150_OQA\\Initialize")
+#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA")
+#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Data")
+#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Alarm")
+#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Initialize")
 
 #endif
 

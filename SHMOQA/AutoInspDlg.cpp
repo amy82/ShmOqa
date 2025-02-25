@@ -460,7 +460,7 @@ void CAutoInspDlg::OnTimer(UINT_PTR nIDEvent)
 		//spec
 		//1.lot완공 후 다음 Bcr Scan 시점까지의 IdleReasonTimerInterval보다 긴경우
 		//2.일시정지 후 IdleReasonTimerInterval보다 긴경우
-		CTime cTime = CTime::GetCurrentTime();
+		/*CTime cTime = CTime::GetCurrentTime();
 		CString strData;
 		strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
 			cTime.GetYear(),
@@ -468,10 +468,10 @@ void CAutoInspDlg::OnTimer(UINT_PTR nIDEvent)
 			cTime.GetDay(),
 			cTime.GetHour(),
 			cTime.GetMinute(),
-			cTime.GetSecond());
+			cTime.GetSecond());*/
 
 
-		_stprintf_s(g_clTaskWork[0].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//timer  팝업 뜨는 시간인지 idle 로 바뀐 시간인지 확인필요
+		//_stprintf_s(g_clTaskWork[0].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//timer  팝업 뜨는 시간인지 idle 로 바뀐 시간인지 확인필요
 
 		m_clIdlePopupDlg.ShowWindow(SW_SHOW);			//WM_IDLE_REASON_TIMER
 		EnableWindow(FALSE);
@@ -848,12 +848,12 @@ void CAutoInspDlg::InitializeService()
 	
 
 	//EEPROM_Temp_DumpLoad(0, g_clMesCommunication[0].mMesGetEEpromData);
-	g_clDioControl.ReadDOut(1);
+	//g_clDioControl.ReadDOut(1);
 
-	g_clDioControl.ReadByteOut(1, 0);
-	g_clDioControl.ReadByteOut(1, 1);
-	g_clDioControl.ReadByteOut(1, 2);
-	g_clDioControl.ReadByteOut(1, 3);
+	//g_clDioControl.ReadByteOut(1, 0);
+	//g_clDioControl.ReadByteOut(1, 1);
+	//g_clDioControl.ReadByteOut(1, 2);
+	//g_clDioControl.ReadByteOut(1, 3);
 	
 	
 
@@ -870,6 +870,7 @@ void CAutoInspDlg::InitializeService()
 
 	//SetTimer(WM_UI_CM_TIMER, 200, NULL);
     //AddLog(_T("[INFO] 서비스 초기화 완료"), 0, 999);
+	g_clDioControl.SetBuzzer(false);
 
 	sMsg.Empty();
 }
@@ -1525,10 +1526,10 @@ void CAutoInspDlg::InitCtrl()
 
 
 #if (____MACHINE_NAME == MODEL_FRONT_100)
-	strtemp.Format("SHM OHC 100 %s %s", szData, VER_STR);
+	strtemp.Format("SHM FRONT 100 %s %s", szData, VER_STR);
 	m_clColorStaticVersion[0].SetWindowText(strtemp);
 #elif (____MACHINE_NAME == MODEL_OHC_150)		//MODEL_FOV_IP)
-	strtemp.Format("SHM IP 150 %s %s", szData, VER_STR);
+	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
 	m_clColorStaticVersion[0].SetWindowText(strtemp);
 #endif
 	TCHAR szLog[SIZE_OF_1K];
@@ -3338,6 +3339,9 @@ void CAutoInspDlg::ShowBarcode(int nUnit)
 
     m_clColorStaticBcrVal[nUnit].SetWindowText(g_clTaskWork[nUnit].m_szChipID);
 	m_clColorStaticBcrVal[nUnit].Invalidate();
+
+	m_clMainDlg.m_edtAbortLot.SetWindowTextA(g_clTaskWork[nUnit].m_szChipID);
+	
 }
 
 //-----------------------------------------------------------------------------
@@ -3969,10 +3973,9 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 	
 
 	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
-	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 2;
 	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 
-	sData.Empty();
     return true;
 }
 
@@ -4018,7 +4021,9 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 {
     
 
-    g_clMotorSet.StopAxisAll(nUnit);
+   // g_clMotorSet.StopAxisAll(nUnit);
+
+	g_clDioControl.SetBuzzer(false);
 
     if (m_clActiveAlignThread[nUnit].GetThreadRunning() == true)
     {
@@ -4056,7 +4061,7 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 	g_clTaskWork[nUnit].m_nAutoFlag = MODE_STOP;
 
 	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 9;	//1 = Full-Auto Mode, 9 = Manual Mode
-	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 2; 
 	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 
 	AddLog(_T("[STOP] 자동 운전 정지"), 0, nUnit);
@@ -5769,6 +5774,8 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
 
 
 	m_clUbiGemDlg.AlarmClearSendFn();
+	AddLog(_T("[INFO] Alarm Clear"), 0, 0);
+
     this->StartHomeProcess(UNIT_AA1);
 }
 
@@ -5792,15 +5799,20 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 		AddLog(_T("[INFO] 일시정지중 사용 불가"), 1, UNIT_AA1);
 		return;
 	}
-	if (g_clModelData[UNIT_AA1].m_nDoorLockUse == 1)
-	{
-		if (g_clDioControl.GetDoorState() > 0)	// 다 닫겨있으면 true, 열리면 false.
-		{
-			AddLog(_T("[INFO] DOOR OPEN.. 원점동작 불가."), 1, UNIT_AA1, TRUE);
-			return;
-		}
-	}
+	//if (g_clModelData[UNIT_AA1].m_nDoorLockUse == 1)
+	//{
+	//	if (g_clDioControl.GetDoorState() > 0)	// 다 닫겨있으면 true, 열리면 false.
+	//	{
+	//		AddLog(_T("[INFO] DOOR OPEN.. 원점동작 불가."), 1, UNIT_AA1, TRUE);
+	//		return;
+	//	}
+	//}
+
+
 	m_clUbiGemDlg.AlarmClearSendFn();
+	AddLog(_T("[INFO] Alarm Clear"), 0, 0);
+
+
 	this->StartAutoReadyProcess(UNIT_AA1);
     
 }
@@ -5815,40 +5827,24 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoRun1()
 	TCHAR szLog[SIZE_OF_1K];
     // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	
-	//if (g_clModelData[UNIT_AA1].m_nMesPass == 1)
-	//{
-	//	
-	//	/*if (g_ShowMsgModal(_T("확인"), _T("[AUTO] MES PASS 입니다 진행하시겠습니까?"), RGB_COLOR_RED) == false)
-	//	{
-	//		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]MES PASS MODE.STOP"));
-	//		AddLog(szLog, 1, UNIT_AA1);
-	//		return;
-	//	}*/
-	//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]MES PASS 입니다"));
-	//	AddLog(szLog, 0, UNIT_AA1);
-	//}
 
-	/*if (MesSpecLoadCheck == false)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] MES SPEC LOAD FAIL"));
-		AddLog(szLog, 1, UNIT_AA1, true);
-		return;
-	}*/
-	if (g_clModelData[UNIT_AA1].m_nDoorLockUse == 1)
-	{
-		if (g_clDioControl.GetDoorState() > 0)	// 다 닫겨있으면 true, 열리면 false.
-		{
-			AddLog(_T("[INFO] DOOR OPEN.. 원점동작 불가."), 1, UNIT_AA1, TRUE);
-			return;
-		}
-	}
+	//if (g_clModelData[UNIT_AA1].m_nDoorLockUse == 1)
+	//{
+	//	if (g_clDioControl.GetDoorState() > 0)	// 다 닫겨있으면 true, 열리면 false.
+	//	{
+	//		AddLog(_T("[INFO] DOOR OPEN.. 원점동작 불가."), 1, UNIT_AA1, TRUE);
+	//		return;
+	//	}
+	//}
 
 	if (LgitLicenseCheck() == false)
 	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO] LGIT License 인식 실패"));
+		AddLog(szLog, 1, 0, true);
 		return;
 	}
     this->StartAutoProcess(UNIT_AA1);
-}
+ }
 
 //-----------------------------------------------------------------------------
 //
@@ -5919,20 +5915,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 	//return;
 
      //TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.  (m_nUnit + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
-    CString sMsg = _T("");
-
-#ifdef ON_LINE_SOCKET
-	//sMsg.Format(_T("#AA%d@PCB&ESC$"), (UNIT_AA1 + 1));		//Auto Stop
-	//this->SendDataToAAMain(UNIT_AA1, sMsg);
-	//Sleep(100);
- //   sMsg.Format(_T("#AA%d@ALARM&CLR$"), (UNIT_AA1 + 1));
- //   this->SendDataToAAMain(UNIT_AA1, sMsg);
-	//Sleep(100);
- //   sMsg.Format(_T("#AA%d@ULD&ESC$"), (UNIT_AA1 + 1));
- //   this->SendDataToAAMain(UNIT_AA1, sMsg); 
-	//sMsg.Empty();
-#endif
-
 
     this->StopAutoProcess(UNIT_AA1);
 }
@@ -5945,23 +5927,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 void CAutoInspDlg::OnBnClickedButtonMainAutoPause1()
 {
     // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-    CString sMsg = _T("");
-
-#ifdef ON_LINE_SOCKET
-	sMsg.Format(_T("#AA%d@PCB&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));		//Auto Pause
-	this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-	sMsg.Format(_T("#AA%d@LENS&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));		//Auto Stop
-	this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-    sMsg.Format(_T("#AA%d@ALARM&CLR$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
-    this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-   
-    sMsg.Format(_T("#AA%d@ULD&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
-    this->SendDataToAAMain(UNIT_AA1, sMsg);
-
-#endif
 
 
 	this->PauseAutoProcess(UNIT_AA1);
@@ -6544,23 +6509,46 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 
 	g_clMotorSet.MovePcbTMotor(0, m_dMesUvAfterRotate * count, true);
 */
-	byte WData[1];
-	WData[0] = 0x07;
-
-	int index = 2;
-	byte ndata = (WData[0] & (1 << index)) >> index;
-	_stprintf_s(szLog, SIZE_OF_1K, _T("Start Data :%d"), WData[0]);
-	AddLog(szLog, 0, 0);
-	for (size_t i = 0; i < 4; i++)
+	int m_nUnit = 0;
+	int nStep = 10000;
+	ShowBarcode(0);
+	g_clModelData[0].LotDataSave();
+	if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote)
 	{
-		ndata = (WData[0] & (1 << i)) >> i;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("Data :%d"), ndata);
-		AddLog(szLog, 0, 0);
+		g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+		g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+		g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Idle)Process State Change Report [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
+
+		g_clTaskWork[0].bIdleTimeExceed = false;		//init
+		g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+																								//CTime cTime = CTime::GetCurrentTime();//ERRRRRRRRRRRR
+		SYSTEMTIME SystemTime;
+		::GetLocalTime(&SystemTime);
+
+		CString strData = _T("");
+		strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+			SystemTime.wYear,// cTime.GetYear(),
+			SystemTime.wMonth,//cTime.GetMonth(),
+			SystemTime.wDay,//cTime.GetDay(),
+			SystemTime.wHour,//cTime.GetHour(),
+			SystemTime.wMinute,//cTime.GetMinute(),
+			SystemTime.wSecond);//cTime.GetSecond());
+
+		_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+		g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+		if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+		{
+			g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+		}
+		g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+		strData.Empty();
 	}
-	byte data = WData[0];
-	ndata = 0;
-	data <<= index;
-	data >>= 7;
 	return;
 //bit얻기
 //return (data & (1 << n번째)) >>n번째;
@@ -6744,6 +6732,7 @@ void CAutoInspDlg::OnStnClickedStaticMainBcrVal2()
 void CAutoInspDlg::FinishService()
 {
 	int i = 0;
+	g_pCarAABonderDlg->m_clUbiGemDlg.UbiGemInit = true;
 	g_clLaonGrabberWrapper[UNIT_AA1].CloseDevice();
 	
 	TopChartControl[UNIT_AA1].dpctrlLedVolume(LIGHT_CHART_CH_1, 0);
@@ -7599,7 +7588,7 @@ void CAutoInspDlg::OnBnClickedButtonMainMes1()
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
 		return;
 	}
-	m_clUbiGemDlg.ShowWindow(SW_SHOW);
+	//m_clUbiGemDlg.ShowWindow(SW_SHOW);
 
 	/*if (m_bMesConnect == true)
 	{

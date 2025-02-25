@@ -65,7 +65,7 @@ CPcbProcess::~CPcbProcess(void)
 int CPcbProcess::OqaHomeProcess(int nStep)
 {
 	TCHAR szLog[SIZE_OF_1K];
-	CString sMsg = _T("");
+	//CString sMsg = _T("");
 	int nHomeFlag = 0;
 	int nRetStep = 0;
 	int i = 0;
@@ -86,10 +86,47 @@ int CPcbProcess::OqaHomeProcess(int nStep)
 	switch (nStep)
 	{
 	case 10000:
-		g_clDioControl.EziStartBtnLedOn(m_nUnit, false);
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[ORG] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+			
+			SYSTEMTIME SystemTime;
+			::GetLocalTime(&SystemTime);
+
+			CString strData = _T("");
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				SystemTime.wYear,// cTime.GetYear(),
+				SystemTime.wMonth,//cTime.GetMonth(),
+				SystemTime.wDay,//cTime.GetDay(),
+				SystemTime.wHour,//cTime.GetHour(),
+				SystemTime.wMinute,//cTime.GetMinute(),
+				SystemTime.wSecond);//cTime.GetSecond());
+
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
 		nRetStep = 11200;
 		break;
 	case 11200:
+		g_clDioControl.EziStartBtnLedOn(m_nUnit, false);
 		nRetStep = 11400;
 		break;
 	case 11400:
@@ -262,7 +299,7 @@ int CPcbProcess::OqaAutoReadyProcess(int nStep)
 	int nRetStep;
 	double dPos[4] = { 0.0, 0.0, 0.0, 0.0 };
 	double curPos = 0.0;
-	CString sMsg = _T("");
+	//CString sMsg = _T("");
 	int i = 0;
 	nRetStep = nStep;
 
@@ -279,19 +316,56 @@ int CPcbProcess::OqaAutoReadyProcess(int nStep)
 	switch (nStep)
 	{
 	case 20000:
-		g_clDioControl.EziStartBtnLedOn(m_nUnit, false);
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[READY] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+			
+
+																									//CTime cTime = CTime::GetCurrentTime();//ERRRRRRRRRRRR
+			SYSTEMTIME SystemTime;
+			::GetLocalTime(&SystemTime);
+
+			CString strData = _T("");
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				SystemTime.wYear,// cTime.GetYear(),
+				SystemTime.wMonth,//cTime.GetMonth(),
+				SystemTime.wDay,//cTime.GetDay(),
+				SystemTime.wHour,//cTime.GetHour(),
+				SystemTime.wMinute,//cTime.GetMinute(),
+				SystemTime.wSecond);//cTime.GetSecond());
+
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
 		nRetStep = 21000;
 		break;
 	case 21000:
 
+		g_clDioControl.EziStartBtnLedOn(m_nUnit, false);
 		//이물광원
-		//LIGHT_BD_OC_CH2
-		BackDuLightControl[m_nUnit].ctrlLedVolume(0, g_clModelData[m_nUnit].m_nLight[LIGHT_DATA_OC_WHITE1]);
-		Sleep(10);
 
 		nRetStep = 21200;
 		break;
 	case 21200:
+		//LIGHT_BD_OC_CH2
+		BackDuLightControl[m_nUnit].ctrlLedVolume(0, g_clModelData[m_nUnit].m_nLight[LIGHT_DATA_OC_WHITE1]);
+		Sleep(10);
 		nRetStep = 21400;
 		break;
 	case 21400:
@@ -985,8 +1059,18 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 	switch (nStep)
 	{
 	case 30000:
-		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote)
+		if (g_pCarAABonderDlg->m_clUbiGemDlg.bConnected() == false)
 		{
+			sMsg.Format(_T("MES DISCONNECTED") );
+			AddLog(sMsg, 1, m_nUnit, true);
+			nRetStep = -30000;
+			break;
+		}
+
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+
 			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
 			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
 			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
@@ -997,9 +1081,12 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 			g_clTaskWork[0].bIdleTimeExceed = false;		//init
 			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
 
+			
+			
+		
 
-			CTime cTime = CTime::GetCurrentTime();
-			CString strData;
+			CTime cTime = CTime::GetCurrentTime();//ERRRRRRRRRRRR
+			CString strData = _T("");
 			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
 				cTime.GetYear(),
 				cTime.GetMonth(),
@@ -1340,11 +1427,13 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 		else if (g_clTaskWork[m_nUnit].bRecv_Lgit_Pp_select == 1)
 		{
 			//Recipe ID Check
-			//
-			//
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2000);
+			g_clDioControl.SetBuzzer(true);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[%s] 사용중인 RECIPE (%s) 와 다릅니다.\n재시도 하시겠습니까?"), g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sMesPPID);
 			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmClearSendFn();
+				g_clDioControl.SetBuzzer(false);
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Object Id Report Retry [STEP : %d]"), nStep);
 				AddLog(szLog, 0, m_nUnit);
 				nRetStep = 30600;
@@ -1538,12 +1627,13 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 			}
 
 
-
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2001);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
 				g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
 
 			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmClearSendFn();
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
 				AddLog(szLog, 0, m_nUnit);
 				nRetStep = 30600;
@@ -1587,6 +1677,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 		}
 		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm == 1)	//LGIT_PP_UPLOAD_FAIL 확인필요 250112
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2002);
 			//LGIT_PP_UPLOAD_FAIL 오고 S2F50보낸뒤,  NG (Recipe Body Cancel by Host)
 			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
 
@@ -1594,6 +1685,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 				g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
 			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmClearSendFn();
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Fail Retry [STEP : %d]"), nStep);
 				AddLog(szLog, 0, m_nUnit);
 				nRetStep = 30600;
@@ -1698,7 +1790,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 				}
 			}
 
-
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2003);
 
 
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
@@ -1706,6 +1798,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 
 			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmClearSendFn();
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
 				AddLog(szLog, 0, m_nUnit);
 				nRetStep = 30600;
@@ -1858,7 +1951,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 #endif
 		break;
 	case 31800:
-
+		nRetStep = 32000;
 		break;
 	case 31900:
 
@@ -2197,7 +2290,7 @@ int CPcbProcess::OqaAutoEOLFinalSFR(int nStep)
 		{
 			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
 			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10711"));
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Ct TimeOut [STEP : %d]"), nStep);
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Ct TimeOut [STEP : %d]"), nStep); 
 			AddLog(szLog, 1, m_nUnit, true);
 
 			nRetStep = -116300;

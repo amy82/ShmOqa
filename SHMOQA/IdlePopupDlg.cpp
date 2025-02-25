@@ -225,7 +225,7 @@ void CIdlePopupDlg::OnBnClickedOk()
 
 	//Idle Start Time
 	reportData.AppendFormat(_T("%s,"), g_clTaskWork[m_nUnit].m_szIdleStartTime);	//Excuting 하고 바로 Idle 전환한 시간
-	
+	//g_clTaskWork[0].m_szIdleStartTime
 
 	CTime cTime = CTime::GetCurrentTime();
 	CString strData;
@@ -238,6 +238,7 @@ void CIdlePopupDlg::OnBnClickedOk()
 		cTime.GetSecond());
 
 
+	_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);
 	_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleEndTime, SIZE_OF_100BYTE, _T("%s"), strData);
 
 	//Idle End Time
@@ -251,6 +252,9 @@ void CIdlePopupDlg::OnBnClickedOk()
 
 	g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
 	g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//Idle Ok Button
+
+
+
 	CDialogEx::OnOK();
 }
 void CIdlePopupDlg::setOperatorID(CString opId)

@@ -838,6 +838,10 @@ void CMainDlg::setCommunicationState(int state)
 }
 void CMainDlg::setControlState(int state)
 {
+	if (m_clColorButtonMainControlOnlineRemoteReq.m_hWnd == NULL)
+	{
+		return;
+	}
 	g_pCarAABonderDlg->m_clButtonMes[0].state = 0;
 
 	m_clColorButtonMainControlOfflineReq.state = 0;

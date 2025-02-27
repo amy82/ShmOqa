@@ -313,9 +313,11 @@ void CUbiGem::OnReceivedUnknownMessage(UbiGEMWrapper::Structure::SECSMessage* pM
 int CUbiGem::OnReceivedEstablishCommunicationsRequest(LPCTSTR strMdln, LPCTSTR strSofRev)
 {
 	UbiGEMWrapper::Structure::GEMResult gemResult = m_pWrapper->EstablishCommunication();		//250113 우선 빼고 진행
-	UbisamAddLog(_T("EstablishCommunication 1-13"), gemResult);
-	Sleep(10);
-	CString strLog = _T("");;
+	UbisamAddLog(_T("EstablishCommunication"), gemResult);
+
+	Sleep(50);
+
+	CString strLog = _T("");
 	//Auto Reply
 	strLog.Format(_T("OnReceivedEstablishCommunicationsRequest : [MDLN=%s,SOFTREV=%s]"), strMdln, strSofRev);
 
@@ -2840,6 +2842,11 @@ void CUbiGem::UpdateDialogTitle()
 	CString strControlState = _T("");
 	CString strTitle = _T("");
 	strTitle = _T("UbiGEM) UGC FILE PATH : ");//strTitle = _T("UbiGEM Sample : ");
+
+	if (g_pCarAABonderDlg->m_clMainDlg.m_hWnd == NULL)
+	{
+		return;
+	}
 
 	if (m_pWrapper != nullptr)
 	{

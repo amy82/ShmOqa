@@ -22,12 +22,13 @@
 #define  MODEL_OHC_150						32000			//SHM150
 //
 //
-#define ____MACHINE_NAME					MODEL_FRONT_100
+#define ____MACHINE_NAME					MODEL_OHC_150
 
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250225_1")			//lot abord 삭제 , 레시피파일 xml에서 ini파일로 변경
+#define				VER_STR										_T("250226_1")			//LAST
+//#define				VER_STR										_T("250225_1")			//lot abord 삭제 , 레시피파일 xml에서 ini파일로 변경
 //#define				VER_STR										_T("250224_3")		//ReadByteOut 삭제
 //#define				VER_STR										_T("250224_2")				//cstring = cstring 대입 사용 금지
 //#define				VER_STR										_T("250224_1")			//case 30000: idle 빠져서 추가

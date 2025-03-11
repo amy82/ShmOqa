@@ -1493,7 +1493,6 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 			AddLog(szLog, 0, m_nUnit);
 
 			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401); //SEND S6F11
-																									//S6F11 Send
 
 			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
 			nRetStep = 30900;
@@ -1734,6 +1733,7 @@ int CPcbProcess::OqaAuto_M_PCBLoading(int nStep)
 		{
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lgit Lot Start Send acknowledge [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
+
 			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
 			g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
 			//Recv LGIT_LOT_START

@@ -3523,6 +3523,7 @@ void CUbiGem::AlarmSendFn(int nAlarmID)
 	for (int i = 0; i < g_clMesCommunication[m_nUnit].m_uAlarmList.size(); i++)
 	{
 		strLog.Format(_T("AlarmSet : [ALID=%lld]"), g_clMesCommunication[m_nUnit].m_uAlarmList[i]);
+
 		if (g_clMesCommunication[m_nUnit].m_uAlarmList[i] == 1008 ||
 			g_clMesCommunication[m_nUnit].m_uAlarmList[i] == 1046 ||
 			g_clMesCommunication[m_nUnit].m_uAlarmList[i] == 1059 ||

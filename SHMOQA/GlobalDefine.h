@@ -27,7 +27,8 @@
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250311_1")			//home branch add
+#define				VER_STR										_T("250311_2")			//aps branch add
+//#define				VER_STR										_T("250311_1")			//home branch add
 //#define				VER_STR										_T("250226_1")			//LAST
 //#define				VER_STR										_T("250225_1")			//lot abord 삭제 , 레시피파일 xml에서 ini파일로 변경
 //#define				VER_STR										_T("250224_3")		//ReadByteOut 삭제

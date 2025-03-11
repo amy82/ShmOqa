@@ -581,7 +581,7 @@ void CAutoInspDlg::InitializeService()
     TCHAR szLog[SIZE_OF_1K];
     CString sMsg = _T("");
     int i;
-
+	g_nRunMode = 0;
     // 메인 다이얼로그 포인터
     g_pCarAABonderDlg = this;
 	m_clLogThread.StartThread();
@@ -1516,22 +1516,26 @@ void CAutoInspDlg::InitCtrl()
 //
 //
 //
-//#if (____MACHINE_NAME ==  MODEL_FOV_80)
-//	strtemp.Format("Rivian %s 3M %s", szData, VER_STR);
-//#elif (____MACHINE_NAME ==  MODEL_FOV_120)
-//	strtemp.Format("Rivian %s 8M %s", szData, VER_STR);
-//#else 
-//	strtemp.Format("Rivian %s MINI %s", szData, VER_STR);
+
+
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	strtemp.Format("SHM FRONT 100 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//#elif (____MACHINE_NAME == MODEL_OHC_150)		//MODEL_FOV_IP)			//ok
+//	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
 //#endif
 
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		MainTitleSet(1);
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	strtemp.Format("SHM FRONT 100 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
-#elif (____MACHINE_NAME == MODEL_OHC_150)		//MODEL_FOV_IP)
-	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
-#endif
+	}
+	else
+	{
+		MainTitleSet(2);
+
+	}
 	TCHAR szLog[SIZE_OF_1K];
 
 
@@ -1595,7 +1599,21 @@ void CAutoInspDlg::InitCtrl()
     m_clColorButtonMinimize.state = 200;
     m_clColorButtonExit.state = 200;
 }
-
+void CAutoInspDlg::MainTitleSet(int index)
+{
+	CString strtemp;
+	if (index == 1)
+	{
+		strtemp.Format("FRONT EOL %s", VER_STR);		//100
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	else
+	{
+		strtemp.Format("OHC EOL %s", VER_STR);			//150
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	m_clColorStaticVersion[0].Invalidate();
+}
 //-----------------------------------------------------------------------------
 //
 //	그래프 생성
@@ -6326,6 +6344,11 @@ void CAutoInspDlg::OnBnClickedButtonMainAlarm()
 void CAutoInspDlg::OnBnClickedButtonMainConfig()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
 	m_nCurrentDlg = DLG_CONFIG;
 	this->ShowDialog(m_nCurrentDlg);
 }

@@ -136,13 +136,46 @@ void CModelList::ModelListLoad()
 	}
 	else
 	{
-		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, _T("00000000001"));
-		clModelInfo.m_nNo = 1;
 		m_nCurrentNo = 1;
-		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, m_szCurrentModel);	// TODO: 모델 없을 경우 하나 추가하기
+		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, SHM_FRONT_100_MODEL);
+
+
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, SHM_FRONT_100_MODEL);	// TODO: 모델 없을 경우 하나 추가하기
+		clModelInfo.m_nNo = 1;
 		m_clModelList.Add(clModelInfo);
 
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, SHM_OHC_150_MODEL);	// TODO: 모델 없을 경우 하나 추가하기
+		clModelInfo.m_nNo = 2;
+		m_clModelList.Add(clModelInfo);
+
+		m_nTotalCount = 2;
 		ModelListSave();
+	}
+
+	TCHAR szLog[SIZE_OF_1K];
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[MODEL] %s Load"), ModelList.m_szCurrentModel);
+	AddLog(szLog, 0, 0);
+
+	//if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(BASE_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA"));
+		_stprintf_s(BASE_DATA_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Data"));
+		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Alarm"));
+		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Initialize"));
+		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Firmware"));
+
+		g_pCarAABonderDlg->MainTitleSet(1);
+	}
+	else
+	{
+		_stprintf_s(BASE_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA"));
+		_stprintf_s(BASE_DATA_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Data"));
+		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Alarm"));
+		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Initialize"));
+		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Firmware"));
+
+		g_pCarAABonderDlg->MainTitleSet(2);
 	}
 }
 
@@ -309,13 +342,20 @@ void CModelList::RecipeModelLoad()
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
 
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
-#else
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
-#endif
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)		//ok
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+//#else
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+//#endif
 
-
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+	}
+	else
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+	}
 
 
 	GetPrivateProfileString(_T("RECIPE_MODEL"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
@@ -345,12 +385,20 @@ void CModelList::RecipeModelSave()
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
 
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
-#else
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
-#endif
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)		//ok
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+//#else
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+//#endif
 
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+	}
+	else
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+	}
 
 	_stprintf_s(szIniBuff, SIZE_OF_1K, _T("%s"), g_clMesCommunication[0].m_sMesPPID);
 	WritePrivateProfileString(_T("RECIPE_MODEL"), szIniIndex, szIniBuff, szPath);
@@ -1895,54 +1943,7 @@ void CModelData::Load(TCHAR* szModelName)
             }
         }
     }
-    //------------------------------------------------------------------------------
-    //fov
-    //------------------------------------------------------------------------------
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-        // fov 마크 위치
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("%02d"), i + 1);
-        GetPrivateProfileString(_T("FovOffset"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-        for (j = 0; j < 2; j++)
-        {
-            AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
-            switch (j)
-            {
-            case 0:		m_clSfrInfo.m_clPtFovOffset[i].x = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
-            case 1:		m_clSfrInfo.m_clPtFovOffset[i].y = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
-            }
-        }
-
-
-        // fov 마크 영역
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%02d"), i + 1);
-        GetPrivateProfileString(_T("FovMark"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-        for (j = 0; j < 4; j++)
-        {
-            AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
-            switch (j)
-            {
-            case 0:		m_clSfrInfo.m_clRectFov[i].left = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
-            case 1:		m_clSfrInfo.m_clRectFov[i].top = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
-            case 2:		m_clSfrInfo.m_clRectFov[i].right = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
-            case 3:		m_clSfrInfo.m_clRectFov[i].bottom = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
-            }
-        }
-    }
-	GetPrivateProfileString(_T("FOV_SIZE"), _T("SizeX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		m_clSfrInfo.m_nFovSizeX[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
-	}
-
-	GetPrivateProfileString(_T("FOV_SIZE"), _T("SizeY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		m_clSfrInfo.m_nFovSizeY[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
-	}
-
+    
 	//
 	// Fov oc 위치
 	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FOV_OC"));
@@ -2500,32 +2501,9 @@ void CModelData::Save(TCHAR* szModelName)
     //------------------------------------------------------------------------------
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-        // FOV 마크 위치
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("%02d"), i + 1);
-        _stprintf_s(szData, SIZE_OF_1K, _T("%d / %d"), m_clSfrInfo.m_clPtFovOffset[i].x, m_clSfrInfo.m_clPtFovOffset[i].y);
-        WritePrivateProfileString(_T("FovOffset"), szIniIndex, szData, szPath);
-
-        // FOV 마크 영역
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%02d"), i + 1);
-        _stprintf_s(szData, SIZE_OF_1K, _T("%d / %d / %d / %d"), m_clSfrInfo.m_clRectFov[i].left,
-            m_clSfrInfo.m_clRectFov[i].top, m_clSfrInfo.m_clRectFov[i].right, m_clSfrInfo.m_clRectFov[i].bottom);
-        WritePrivateProfileString(_T("FovMark"), szIniIndex, szData, szPath);
-    }
 	CString addStr;
 	addStr.Empty();
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		addStr.AppendFormat(_T("%d / "), m_clSfrInfo.m_nFovSizeX[i]);
-	}
-	_stprintf_s(szData, SIZE_OF_1K, _T("%s"), addStr);
-	WritePrivateProfileString(_T("FOV_SIZE"), _T("SizeX"), szData, szPath);
-	addStr.Empty();
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		addStr.AppendFormat(_T("%d / "), m_clSfrInfo.m_nFovSizeY[i]);
-	}
+	
 	_stprintf_s(szData, SIZE_OF_1K, _T("%s"), addStr);
 	WritePrivateProfileString(_T("FOV_SIZE"), _T("SizeY"), szData, szPath);
 
@@ -4691,36 +4669,6 @@ void CMandoInspLog::InitData()
 	m_dPCBOffset[0] = m_dPCBOffset[1] = m_dPCBOffset[2] = 0.0;
 
 
-	for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
-	{
-		m_ShmFovPoint[i].x = 0;
-		m_ShmFovPoint[i].y = 0;
-	}
-	//CPoint m_ShmFovPoint[MAX_FOV_COUNT]
-	for (i = 0; i < 50; i++)
-	{
-		m_ChartVertex[i].Pos[0].x = 0;
-		m_ChartVertex[i].Pos[1].x = 0;
-		m_ChartVertex[i].Pos[2].x = 0;
-		m_ChartVertex[i].Pos[3].x = 0;
-		m_ChartVertex[i].Pos[4].x = 0;
-		m_ChartVertex[i].Pos[5].x = 0;
-		m_ChartVertex[i].Pos[6].x = 0;
-		m_ChartVertex[i].Pos[7].x = 0;
-		m_ChartVertex[i].Pos[8].x = 0;
-		m_ChartVertex[i].Pos[9].x = 0;
-
-		m_ChartVertex[i].Pos[0].y = 0;
-		m_ChartVertex[i].Pos[1].y = 0;
-		m_ChartVertex[i].Pos[2].y = 0;
-		m_ChartVertex[i].Pos[3].y = 0;
-		m_ChartVertex[i].Pos[4].y = 0;
-		m_ChartVertex[i].Pos[5].y = 0;
-		m_ChartVertex[i].Pos[6].y = 0;
-		m_ChartVertex[i].Pos[7].y = 0;
-		m_ChartVertex[i].Pos[8].y = 0;
-		m_ChartVertex[i].Pos[9].y = 0;
-	}
 
 
 	m_dCurrent = 0.0;

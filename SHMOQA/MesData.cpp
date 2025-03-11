@@ -554,19 +554,6 @@ void CMesCommunication::Insp()
 
 }
 
-bool CMesCommunication::g_Grr____Align(int nUnit)
-{
-
-	return true;
-}
-
-
-
-bool CMesCommunication::g_Grr____LaserMotorPos(int nUnit)
-{
-
-	return true;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------
 
@@ -626,11 +613,20 @@ bool CMesCommunication::g_Final_OqaLog(int nUnit)
 
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+	}
 
 
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\Final_OQA_Log_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);

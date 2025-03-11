@@ -20,8 +20,7 @@ public:
 
 	bool g_FovVertexLog(int index);
 
-	bool g_Grr____LaserMotorPos(int index);
-	bool g_Grr____Align(int index);
+
 	bool MesAASave(int index);
 	bool MesEolSave(int index);
 

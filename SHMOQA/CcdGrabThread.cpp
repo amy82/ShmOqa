@@ -75,7 +75,7 @@ void CCcdGrabThread::ThreadCallBack()
 	if((GetTickCount() - m_dwTickCount) > 1000)
 	{
         //fps Get
-		g_clTaskWork[m_nUnit].m_fFps = g_clLaonGrabberWrapper[m_nUnit].m_pBoard->GetSensorFrameRate();// fFrameRate;
+		g_clTaskWork[m_nUnit].m_fFps = g_clLaonGrabberWrapper[m_nUnit].m_pBoard->GetSensorFrameRate();
 		if (g_clTaskWork[m_nUnit].m_fFps < 0.1)
 		{
 			g_clTaskWork[m_nUnit].m_fFps = 0.01;

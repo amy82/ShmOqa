@@ -78,11 +78,7 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 		m_nSfrSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeY[i];
 	}
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		m_nFovSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i];
-		m_nFovSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i];
-	}
+
 	m_nCenterSfrSizeX = 150;
 	m_nCenterSfrSizeY = 150;
 
@@ -263,46 +259,7 @@ int CVisionStatic::ChangeCursorMeasureMode(CPoint clPoint)
 //-----------------------------------------------------------------------------
 void CVisionStatic::SetDrawMoveFov(int nRefIndex, CPoint clPoint)
 {
-	int		i = 0;
-	int		nMoveValue = 0;
-	double dDispFacX = 0.0;
-	double dDispFacY = 0.0;
-
-	dDispFacX = ((double)g_clModelData[m_nUnit].m_nWidth / (double)CCD1_DISP_SIZE_X);
-	dDispFacY = ((double)g_clModelData[m_nUnit].m_nHeight / (double)CCD1_DISP_SIZE_Y);
-
-	switch (m_nCursorType)
-	{
-	case CENTER:
-		m_clPtFovOffset[nRefIndex].x = (int)(clPoint.x * dDispFacX) - (m_nFovSizeX[nRefIndex] / 2);
-		m_clPtFovOffset[nRefIndex].y = (int)(clPoint.y * dDispFacY) - (m_nFovSizeY[nRefIndex] / 2);
-		break;
-
-	case LEFT:// LEFT 라인을 움직이면 좌표는 이동량만큼 '-' , 사이즈는 이동량만큼 '+'
-		nMoveValue = m_clPtFovOffset[nRefIndex].x - (int)(clPoint.x * dDispFacX);
-		m_nFovSizeX[nRefIndex] += nMoveValue;
-		m_clPtFovOffset[nRefIndex].x -= nMoveValue;
-		break;
-
-	case RIGHT:// RIGHT 라인을 움직이면 좌표는 안움직이고 , 사이즈는 이동량만큼 '-'
-		nMoveValue = (m_clPtFovOffset[nRefIndex].x + m_nFovSizeX[nRefIndex]) - (int)(clPoint.x * dDispFacX);
-		m_nFovSizeX[nRefIndex] -= nMoveValue;
-		break;
-
-	case TOP:// TOP 라인을 움직이면 좌표는 이동량만큼 '-' , 사이즈는 이동량만큼 '+'
-		nMoveValue = m_clPtFovOffset[nRefIndex].y - (int)(clPoint.y * dDispFacY);
-		m_nFovSizeY[nRefIndex] += nMoveValue;
-		m_clPtFovOffset[nRefIndex].y -= nMoveValue;
-		break;
-
-	case BOTTOM:// BOTTOM 라인을 움직이면 좌표 는 안움직이고 , 사이즈는 이동량만큼 '-'
-		nMoveValue = (m_clPtFovOffset[nRefIndex].y + m_nFovSizeY[nRefIndex]) - (int)(clPoint.y * dDispFacY);
-		m_nFovSizeY[nRefIndex] -= nMoveValue;
-		break;
-
-	default:
-		return;
-	}
+	
 }
 
 
@@ -1141,21 +1098,7 @@ int CVisionStatic::GetSelectedFovNo(CPoint point)
     clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nUnit].m_nWidth / (double)CCD1_DISP_SIZE_X)) + 0.5);
     clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nUnit].m_nHeight / (double)CCD1_DISP_SIZE_Y)) + 0.5);
     //
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-		clRect.left = m_clPtFovOffset[i].x;
-		clRect.top = m_clPtFovOffset[i].y;
-		clRect.right = clRect.left + m_nFovSizeX[i];
-		clRect.bottom = clRect.top + m_nFovSizeY[i];
-
-		if (PtInRect(clRect, clPtPos) == TRUE)
-		{
-			nSelectNo = i;
-			return nSelectNo;
-		}
-
-
-    }
+    
 
     return -1;
 }
@@ -1231,61 +1174,7 @@ int CVisionStatic::GetSelectedCursor(CPoint point)
 	iGap = int((double)g_clModelData[m_nUnit].m_nWidth / (double)CCD1_DISP_SIZE_X * 6);// 5);
 
 
-	if (g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].m_FovSetMode == true)
-	{
-		for (i = 0; i < MAX_FOV_COUNT; i++)
-		{
-			clRectBox.left = m_clPtFovOffset[i].x;
-			clRectBox.top = m_clPtFovOffset[i].y;
-			clRectBox.right = clRectBox.left + m_nFovSizeX[i];
-			clRectBox.bottom = clRectBox.top + m_nFovSizeY[i];
-
-			clRectBox.centerX = (clRectBox.left + clRectBox.right) / 2;
-			clRectBox.centerY = (clRectBox.top + clRectBox.bottom) / 2;
-
-			if ((clPtPos.x >(clRectBox.left + iGap)) &&
-				(clPtPos.x < (clRectBox.right - iGap)) &&
-				(clPtPos.y >(clRectBox.top + iGap)) &&
-				(clPtPos.y < (clRectBox.bottom - iGap)))
-			{
-				return CENTER;
-			}
-			else if ((clPtPos.x >(clRectBox.left - iGap)) &&
-				(clPtPos.x < (clRectBox.left + iGap)) &&
-				(clPtPos.y >(clRectBox.top)) &&
-				(clPtPos.y < (clRectBox.bottom)))
-			{
-				return LEFT;
-			}
-			else if ((clPtPos.x >(clRectBox.right - iGap)) &&
-				(clPtPos.x < (clRectBox.right + iGap)) &&
-				(clPtPos.y >(clRectBox.top)) &&
-				(clPtPos.y < (clRectBox.bottom)))
-			{
-				return RIGHT;
-			}
-			else if ((clPtPos.x > clRectBox.left) &&
-				(clPtPos.x < clRectBox.right) &&
-				(clPtPos.y >(clRectBox.top - iGap)) &&
-				(clPtPos.y < (clRectBox.top + iGap)))
-			{
-				return TOP;
-			}
-			else if ((clPtPos.x > clRectBox.left) &&
-				(clPtPos.x < clRectBox.right) &&
-				(clPtPos.y >(clRectBox.bottom - iGap)) &&//SQUARE_RESET_SIZE_X
-				(clPtPos.y < (clRectBox.bottom + iGap)))
-			{
-				return BOTTOM;
-			}
-			else
-			{
-				nCursor = STANDARD;
-			}
-		}
-
-		return nCursor;
-	}
+	
 	for (i = 0; i < nCount; i++)
 	{
 		if (i < nMaxCount)	//! SFR 영역
@@ -2080,11 +1969,6 @@ void CVisionStatic::SetSnrRoi()
 //-----------------------------------------------------------------------------
 void CVisionStatic::SetFovRoi()
 {
-    int i;
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-        m_clRectFov[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clRectFov[i];
-    }
 }
 //-----------------------------------------------------------------------------
 //
@@ -2106,105 +1990,6 @@ void CVisionStatic::SetSfrRoi()
 		m_clRectCircle[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clRectCircle[i];
 	}
 
-
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		m_clPtFovOffset[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[i];
-	}
-}
-
-//-----------------------------------------------------------------------------
-//
-//	FOV ROI 영역 초기화
-//
-//-----------------------------------------------------------------------------
-void CVisionStatic::InitFovRoi()
-{
-	int i;
-	double dOffsetX, dOffsetY;
-	int nCount = 0;
-	nCount = MAX_FOV_COUNT;
-	for (i = 0; i < nCount; i++)
-	{
-		m_clPtFovOffset[i].x = m_clPtFovOffset[i].y = 0;
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		if (i < 4)
-		{
-			m_nFovSizeX[i] = 270;
-			m_nFovSizeY[i] = 220;
-		}
-		else if (i < 8)
-		{
-			m_nFovSizeX[i] = 170;
-			m_nFovSizeY[i] = 175;
-		}
-		else
-		{
-			m_nFovSizeX[i] = 80;
-			m_nFovSizeY[i] = 130;
-		}
-		switch (i)
-		{
-		case 0:		dOffsetX = 3.0;		dOffsetY = 9.6;		break;	//LT
-		case 1:		dOffsetX = 1.51;	dOffsetY = 9.6;		break;	//R T
-		case 2:		dOffsetX = 3.0;		dOffsetY = 1.12;	break;	//B L
-		case 3:		dOffsetX = 1.51;	dOffsetY = 1.12;	break;	//B R
-																	//
-		case 4:		dOffsetX = 7.0;		dOffsetY = 8.8;		break;
-		case 5:		dOffsetX = 1.175;	dOffsetY = 8.8;		break;
-		case 6:		dOffsetX = 7.0;		dOffsetY = 1.12;	break;
-		case 7:		dOffsetX = 1.175;	dOffsetY = 1.12;	break;
-			//
-		case 8:		dOffsetX = 40.5;	dOffsetY = 15.5;		break;
-		case 9:		dOffsetX = 1.024;	dOffsetY = 15.5;		break;
-		case 10:	dOffsetX = 40.5;	dOffsetY = 1.07;	break;
-		case 11:	dOffsetX = 1.024;	dOffsetY = 1.07;	break;
-		}
-
-#else
-		if (i < 4)
-		{
-			m_nFovSizeX[i] = 130;// 115;
-			m_nFovSizeY[i] = 140;// 125;
-		}
-		else
-		{
-			m_nFovSizeX[i] = 160;// 145;
-			m_nFovSizeY[i] = 190;// 175;
-		}
-
-		switch (i)
-		{
-		case 0:		dOffsetX = 3.88;	dOffsetY = 4.25;		break;	//LT
-		case 1:		dOffsetX = 1.35;	dOffsetY = 4.25;		break;	//R T
-		case 2:		dOffsetX = 3.88;	dOffsetY = 1.31;		break;	//B L
-		case 3:		dOffsetX = 1.35;	dOffsetY = 1.31;		break;	//B R
-		//
-		case 4:		dOffsetX = 7.0;		dOffsetY = 6.3;			break;
-		case 5:		dOffsetX = 1.175;	dOffsetY = 6.3;			break;
-		case 6:		dOffsetX = 7.0;		dOffsetY = 1.2;			break;
-		case 7:		dOffsetX = 1.175;	dOffsetY = 1.2;			break;
-		//
-		case 8:		dOffsetX = 7.4;		dOffsetY = 1.99;		break;
-		case 9:		dOffsetX = 1.158;	dOffsetY = 1.99;		break;
-		}
-
-#endif
-
-		m_clPtFovOffset[i].x = (LONG)((double)g_clModelData[m_nUnit].m_nWidth / dOffsetX) - (m_nFovSizeX[i] / 2);
-		m_clPtFovOffset[i].y = (LONG)((double)g_clModelData[m_nUnit].m_nHeight / dOffsetY) - (m_nFovSizeY[i] / 2);
-
-		m_clRectFov[i].left = m_clPtFovOffset[i].x;
-		m_clRectFov[i].top = m_clPtFovOffset[i].y;
-		m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
-		m_clRectFov[i].bottom = m_clRectFov[i].top + m_nFovSizeY[i];
-	}
-
-	
-
-
-
-	this->DrawRectFov(999);
 }
 
 
@@ -2215,148 +2000,8 @@ void CVisionStatic::InitFovRoi()
 //-----------------------------------------------------------------------------
 void CVisionStatic::InitSfrRoi()
 {
-	int i;
-	double dOffsetX, dOffsetY;
-	int nCount;
-    nCount = MAX_LAST_INSP_COUNT;
-	m_nCenterSfrSizeX = 150;
-	m_nCenterSfrSizeY = 150;
-	for (i = 0; i < nCount; i++)
-	{
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		if (i == 0)
-		{
-			m_nSfrSizeX[i] = 390;
-			m_nSfrSizeY[i] = 360;
-		}
-		else if (i < 5)
-		{
-			m_nSfrSizeX[i] = 160;
-			m_nSfrSizeY[i] = 160;
-		}
-		else
-		{
-			m_nSfrSizeX[i] = 160;
-			m_nSfrSizeY[i] = 160;
-		}
-#else
-		if (i == 0)
-		{
-			m_nSfrSizeX[i] = 270;
-			m_nSfrSizeY[i] = 270;
-		}
-		else if (i < 5)
-		{
-			m_nSfrSizeX[i] = 190;
-			m_nSfrSizeY[i] = 190;
-		}
-		else
-		{
-			m_nSfrSizeX[i] = 150;
-			m_nSfrSizeY[i] = 170;
-		}
-#endif
-	}
-
-
 	
-	for (i = 0; i < nCount; i++)
-	{
-		m_clPtSfrOffset[i].x = m_clPtSfrOffset[i].y = 0;
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		switch (i)
-		{
-		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
-		//
-		case 1:		dOffsetX = 2.8;		dOffsetY = 1.17;		break;	//LT
-		case 2:		dOffsetX = 1.57;	dOffsetY = 1.17;		break;	//R T
-		case 3:		dOffsetX = 2.8;		dOffsetY = 7.3;	break;	//B L
-		case 4:		dOffsetX = 1.57;	dOffsetY = 7.3;	break;	//B R
-		//
-		case 5:		dOffsetX = 7.0;		dOffsetY = 1.12;		break;
-		case 6:		dOffsetX = 1.175;	dOffsetY = 1.12;		break;
-		case 7:		dOffsetX = 7.0;		dOffsetY = 8.8;	break;
-		case 8:		dOffsetX = 1.175;	dOffsetY = 8.8;	break;
-		}
-#else
-		switch (i)
-		{
-		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
-			//
-		case 1:		dOffsetX = 2.6;		dOffsetY = 4.5;		break;
-		case 2:		dOffsetX = 1.63;	dOffsetY = 4.5;		break;
-		case 3:		dOffsetX = 2.6;		dOffsetY = 1.27;	break;
-		case 4:		dOffsetX = 1.63;	dOffsetY = 1.27;	break;
-			//
-		case 5:		dOffsetX = 7.0;		dOffsetY = 6.5;		break;
-		case 6:		dOffsetX = 1.17;	dOffsetY = 6.5;		break;
-		case 7:		dOffsetX = 7.0;		dOffsetY = 1.19;	break;
-		case 8:		dOffsetX = 1.17;	dOffsetY = 1.19;	break;
-		}
-#endif
 
-		m_clPtSfrOffset[i].x = (LONG)((double)g_clModelData[m_nUnit].m_nWidth / dOffsetX) - (m_nSfrSizeX[i] / 2);
-		m_clPtSfrOffset[i].y = (LONG)((double)g_clModelData[m_nUnit].m_nHeight / dOffsetY) - (m_nSfrSizeY[i] / 2);
-
-		m_clRectROI[i].left = m_clPtSfrOffset[i].x;
-		m_clRectROI[i].top = m_clPtSfrOffset[i].y;
-		m_clRectROI[i].right = m_clRectROI[i].left + m_nSfrSizeX[i];
-		m_clRectROI[i].bottom = m_clRectROI[i].top + m_nSfrSizeY[i];
-
-
-	}
-	
-    //
-	
-    //
-    //
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	int dCircleSizeX = 170;
-	int dCircleSizeY = 140;
-	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
-	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
-	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
-	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
-
-	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
-	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
-	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
-	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
-
-	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
-	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
-	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
-	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
-
-	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
-	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
-	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
-	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);																																											//LT_FOV_PIONT = 0, RT_FOV_PIONT, BL_FOV_PIONT, BR_FOV_PIONT, CIRCLE_FOV_PIONT,
-#else
-	int dCircleSizeX = 130;
-	int dCircleSizeY = 110;
-	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
-	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
-	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
-	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
-
-	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
-	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
-	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
-	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
-
-	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
-	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
-	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
-	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
-
-	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
-	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
-	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
-	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
-#endif
-
-    this->DrawRectSfr(999);
     
 }
 //-----------------------------------------------------------------------------
@@ -2418,46 +2063,7 @@ void CVisionStatic::DrawRectSnr(int nIndex)
 //-----------------------------------------------------------------------------
 void CVisionStatic::DrawRectFov(int nIndex)
 {
-#ifndef ON_LINE_MIL
-    return;
-#endif
-    TCHAR szPos[SIZE_OF_100BYTE];
-    int nCount;
-    int nGapX = 40;
-    int nGapY = 40;
-    int i;
 
-    g_clVision.ClearOverlay(m_nUnit);
-
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		m_clRectFov[i].left = m_clPtFovOffset[i].x;
-		m_clRectFov[i].top = m_clPtFovOffset[i].y;
-		m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
-		m_clRectFov[i].bottom = m_clRectFov[i].top + m_nFovSizeY[i];
-	}
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-		if (nIndex == i) 
-		{
-			g_clVision.DrawMOverlayBox(m_nUnit, m_nUnit, m_clRectFov[i], M_COLOR_MAGENTA, 1, FALSE, PS_DASH);// PS_DOT);
-		}
-		else
-		{
-			g_clVision.DrawMOverlayBox(m_nUnit, m_nUnit, m_clRectFov[i], M_COLOR_CYAN, 1, FALSE, PS_DASH);// PS_DOT);
-		}
-
-        g_clVision.DrawMOverlayCross(m_nUnit, m_nUnit, (m_clRectFov[i].right - m_clRectFov[i].left) / 2 + m_clRectFov[i].left, (m_clRectFov[i].bottom - m_clRectFov[i].top) / 2 + m_clRectFov[i].top, 15, M_COLOR_GREEN, 1, FALSE, PS_SOLID);
-		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
-        g_clVision.DrawMOverlayText(m_nUnit, m_clRectFov[i].left + 10, m_clRectFov[i].top + 10, szPos, M_COLOR_WHITE, _T("Arial"), 15, 15);
-        
-    }
-    //}
-
-	_stprintf_s(szPos, SIZE_OF_100BYTE, _T("FovRoi"));
-	g_clVision.DrawMOverlayText(m_nUnit, 10, 150, szPos, M_COLOR_WHITE, _T("Arial"), 12, 20);
-
-    g_clVision.DrawOverlayAll(m_nUnit);
 }
 
 //-----------------------------------------------------------------------------
@@ -2613,89 +2219,7 @@ void CVisionStatic::MoveRectSnr(int nMoveType, int nType, int nMoveSize)
 //-----------------------------------------------------------------------------
 void CVisionStatic::MoveRectFov(int nMoveType, int nType, int nMoveSize)
 {
-    int nCount;
-    int nIndex;
-
-    if (m_nSelectIndexFOV < 0)
-        return;
-
-    nCount = MAX_FOV_COUNT;
-
-    switch (nType)
-    {
-    case MOVE_UP:
-        if (nMoveType == MOVE_POS)
-        {
-            /*nIndex = m_nSelectIndexFOV;
-            m_clRectFov[nIndex].top -= nMoveSize;
-            m_clRectFov[nIndex].bottom -= nMoveSize;*/
-
-			m_clPtFovOffset[m_nSelectIndexFOV].y -= nMoveSize;
-        }
-        else
-        {
-            nIndex = m_nSelectIndexFOV;
-           // m_clRectFov[nIndex].bottom -= nMoveSize;
-
-
-			m_nFovSizeY[nIndex] -= nMoveSize;
-            
-        }
-        break;
-    case MOVE_DOWN:
-        if (nMoveType == MOVE_POS)
-        {
-            /*nIndex = m_nSelectIndexFOV;
-            m_clRectFov[nIndex].top += nMoveSize;
-            m_clRectFov[nIndex].bottom += nMoveSize;*/
-
-			m_clPtFovOffset[m_nSelectIndexFOV].y += nMoveSize;
-        }
-        else
-        {
-            nIndex = m_nSelectIndexFOV;
-            //m_clRectFov[nIndex].bottom += nMoveSize;
-
-			m_nFovSizeY[nIndex] += nMoveSize;
-        }
-        break;
-    case MOVE_LEFT:
-        if (nMoveType == MOVE_POS)
-        {
-            /*nIndex = m_nSelectIndexFOV;
-            m_clRectFov[nIndex].left -= nMoveSize;
-            m_clRectFov[nIndex].right -= nMoveSize;*/
-
-			m_clPtFovOffset[m_nSelectIndexFOV].x -= nMoveSize;
-        }
-        else
-        {
-            nIndex = m_nSelectIndexFOV;
-            //m_clRectFov[nIndex].right -= nMoveSize;
-
-			m_nFovSizeX[nIndex] -= nMoveSize;
-        }
-        break;
-    case MOVE_RIGHT:
-        if (nMoveType == MOVE_POS)
-        {
-            /*nIndex = m_nSelectIndexFOV;
-            m_clRectFov[nIndex].left += nMoveSize;
-            m_clRectFov[nIndex].right += nMoveSize;*/
-
-			m_clPtFovOffset[m_nSelectIndexCCD].x += nMoveSize;
-        }
-        else
-        {
-            nIndex = m_nSelectIndexFOV;
-            //m_clRectFov[nIndex].right += nMoveSize;
-
-			m_nFovSizeX[nIndex] += nMoveSize;
-        }
-        break;
-    }
-
-    this->DrawRectFov(m_nSelectIndexFOV);
+    
 }
 
 //-----------------------------------------------------------------------------
@@ -2938,94 +2462,7 @@ void CVisionStatic::RegistSnrMark()
 //-----------------------------------------------------------------------------
 void CVisionStatic::RegistFovMark()
 {
-    int nPitch, nSizeX, nSizeY;
-    int i;
-
-	int iWidth = 0;
-	int iHeight = 0;
-
-    nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_PITCH, M_NULL);
-    nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_X, M_NULL);
-    nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_Y, M_NULL);
-
-
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-		if (m_clPtFovOffset[i].x < 1)
-		{
-			m_clPtFovOffset[i].x = 0;
-			m_clRectFov[i].left = 0;
-			m_clRectFov[i].right = m_nFovSizeX[i];
-		}
-
-		if (m_clPtFovOffset[i].y < 1)
-		{ 
-			m_clRectFov[i].top = 0;
-			m_clPtFovOffset[i].y = 0;
-			m_clRectFov[i].bottom = m_nFovSizeY[i];
-		}
-		//m_nFovSizeY
-		if (m_clPtFovOffset[i].x + m_nFovSizeX[i] > g_clModelData[m_nUnit].m_nWidth - 1)
-		{
-			m_clPtFovOffset[i].x = g_clModelData[m_nUnit].m_nWidth - 1 - m_nFovSizeX[i];
-			m_clRectFov[i].left = m_clPtFovOffset[i].x;
-			m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
-		}
-
-		if (m_clPtFovOffset[i].y + m_nFovSizeY[i] > g_clModelData[m_nUnit].m_nHeight - 1)
-		{
-			m_clPtFovOffset[i].y = g_clModelData[m_nUnit].m_nHeight - 1 - m_nFovSizeY[i];
-			m_clRectFov[i].top = m_clPtFovOffset[i].y;
-			m_clRectFov[i].bottom = m_clRectFov[i].top + m_nFovSizeY[i];
-		}
-		//m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
-		if (m_clRectFov[i].right > g_clModelData[m_nUnit].m_nWidth - 1)
-		{
-			m_clRectFov[i].right = g_clModelData[m_nUnit].m_nWidth - 1;
-		}
-		if (m_clRectFov[i].bottom > g_clModelData[m_nUnit].m_nHeight - 1)
-		{
-			m_clRectFov[i].bottom = g_clModelData[m_nUnit].m_nHeight - 1;
-		}
-		//g_clModelData[m_nUnit].m_nWidth, g_clModelData[m_nUnit].m_nHeight
-		g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[i].x = m_clRectFov[i].left;
-		g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[i].y = m_clRectFov[i].top;
-
-		g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i] = m_clRectFov[i].right - m_clRectFov[i].left;
-		g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i] = m_clRectFov[i].bottom - m_clRectFov[i].top;
-    }
-
-	TCHAR szPos[SIZE_OF_100BYTE];
-
-	g_CalcImageAlign(m_nUnit);//RegistFovMark
-
-	//g_clModelData[m_nUnit].m_clSfrInfo.m_dFovOcX = g_clTaskWork[m_nUnit].m_dOcResultX;
-	//g_clModelData[m_nUnit].m_clSfrInfo.m_dFovOcY = g_clTaskWork[m_nUnit].m_dOcResultY;
-
-    g_clModelData[m_nUnit].Save(g_clSysData.m_szModelName);
-
-    g_clVision.ClearOverlay(m_nUnit);
-
-
-
-    for (i = 0; i < MAX_FOV_COUNT; i++)
-    {
-		iWidth = m_nFovSizeX[i];
-		iHeight = m_nFovSizeY[i];
-
-        g_clVision.DrawMOverlayBox(m_nUnit, m_nUnit, m_clRectFov[i], M_COLOR_BLUE, 2, FALSE, PS_DOT);
-		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
-		g_clVision.DrawMOverlayText(m_nUnit, m_clRectFov[i].left + 10, m_clRectFov[i].top + 10, szPos, M_COLOR_WHITE, _T("Arial"), 15, 15);
-
-		if (g_clTaskWork[m_nUnit].m_nAutoFlag != MODE_AUTO)
-		{
-			g_clVision.SaveFovImage(m_nUnit, g_clVision.m_pImgBuff[m_nUnit][1], nPitch, iWidth, iHeight, i, m_clRectFov[i]);
-		}
-    } 
-
-	_stprintf_s(szPos, SIZE_OF_100BYTE, _T("Fov Roi"));
-	g_clVision.DrawMOverlayText(m_nUnit, 20, 20, szPos, M_COLOR_WHITE, _T("Arial"), 15, 30);
-    g_clVision.DrawOverlayAll(m_nUnit);
+   
 
 	
 }

@@ -7,27 +7,29 @@
 #define __GLOBALDEFINE_H__
 
 
-//#define         NORINDA_MODE
+#define         NORINDA_MODE
 //
 //
 //
 //
 //=======================================================================
 //
+#define SHM_FRONT_100_MODEL					_T("ACD02C002X.KM0X")
+#define SHM_OHC_150_MODEL					_T("ACD02C001X.KM0X")
 //
 //
 //
-//
-#define  MODEL_FRONT_100					21000			//SHM100
-#define  MODEL_OHC_150						32000			//SHM150
-//
-//
-#define ____MACHINE_NAME					MODEL_OHC_150
+//#define  MODEL_FRONT_100					21000			//SHM100
+//#define  MODEL_OHC_150						32000			//SHM150
+////
+////
+//#define ____MACHINE_NAME					MODEL_OHC_150
 
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250311_2")			//aps branch add
+#define				VER_STR										_T("250311_3")				//통합 1차 완료
+//#define				VER_STR										_T("250311_2")			//aps branch add , 모델 통합 시작
 //#define				VER_STR										_T("250311_1")			//home branch add
 //#define				VER_STR										_T("250226_1")			//LAST
 //#define				VER_STR										_T("250225_1")			//lot abord 삭제 , 레시피파일 xml에서 ini파일로 변경
@@ -108,8 +110,8 @@
 	//#define ON_LINE_DIO
 	//#define ON_LINE_LIGHT
 	//#define ON_LINE_CAM
-	//#define ON_LINE_MIL
-	//#define ON_LINE_GRABBER
+	#define ON_LINE_MIL
+	#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE
@@ -152,20 +154,20 @@
 //	Program Path
 //
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA_Alarm")
-#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Initialize")
-
-#else
-
-#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Alarm")
-#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Initialize")
-
-#endif
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)			//ok
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA_Alarm")
+//#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_FRONT100_OQA\\Initialize")
+//
+//#else
+//
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Alarm")
+//#define	MIU_DIR				        _T("D:\\EVMS\\SHM_IMAGE_OHC150_OQA\\Initialize")
+//
+//#endif
 
 typedef enum _IoLiveCheck
 {
@@ -564,13 +566,6 @@ static TCHAR* RECIPE_PARAM_NAME[g_RecipeParamCount] =
 #define MAX_DEFECT_COUNT				10
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	#define MAX_FOV_COUNT				12		//8//12		//8개 원만 8개
-	#define MAX_FOV_FIND_COUNT			16
-#else
-	#define MAX_FOV_COUNT				10		//8//10		//8개 2=원, 6 = 꼭짓점
-	#define MAX_FOV_FIND_COUNT			14
-#endif
 //#define MAX_FOV_COUNT				8       //
 //기존 샘플 100도 = 12 , 150 = 10개
 

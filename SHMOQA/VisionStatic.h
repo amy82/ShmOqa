@@ -140,14 +140,6 @@ public:
 	CPoint m_clPtSfrOffset[MAX_LAST_INSP_COUNT];
 
     CRect m_clRectCircle[4];
-
-
-	//FOV
-	CPoint m_clPtFovOffset[MAX_FOV_COUNT];
-    CRect m_clRectFov[MAX_FOV_COUNT];
-
-
-
     CRect m_clRectDrawSnr[MAX_SNR_COUNT];
 	
 private:
@@ -158,8 +150,8 @@ private:
 	int m_nSfrSizeX[MAX_LAST_INSP_COUNT];
 	int m_nSfrSizeY[MAX_LAST_INSP_COUNT];
 
-	int m_nFovSizeX[MAX_FOV_COUNT];
-	int m_nFovSizeY[MAX_FOV_COUNT];
+	//int m_nFovSizeX[MAX_FOV_COUNT];
+	//int m_nFovSizeY[MAX_FOV_COUNT];
 
 	int m_nCenterSfrSizeX;	//센터 차트는 사각형 두개라서 
 	int m_nCenterSfrSizeY;

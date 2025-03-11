@@ -156,7 +156,6 @@ public:
 	bool func_Insp_RotateTilt(BYTE* img,bool bAutoMode = false);
 	bool FnShmEdgeFind(BYTE* img, bool bAutoMode = false);
 	bool FnShmCornerFind(BYTE* img, bool bAutoMode = false);
-	bool FnShmFastCornerFind(BYTE* img, bool bAutoMode = false);
 
 	bool func_Insp_Illumination(BYTE* img, bool bAutoMode = false, bool bUse8BitOnly = false);//lim 240430
 

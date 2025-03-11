@@ -73,6 +73,9 @@ public:
 	CEdit m_edtAbortLot;
 	CEdit m_edtMaterialId;
 	
+	CButtonCT m_clColorButtonMainOp;
+	CButtonCT m_clColorButtonMainEn;
+
 	CGridCtrl m_clGridModel;
 	CGridCtrl m_clGridRecipe;
 
@@ -98,6 +101,7 @@ private:
 	void ShowGridData();
 	
 	void GetGridData();
+	void RunModeChange(int nMode);
 public:
 	void setCommunicationState(int state);
 	void setControlState(int state);
@@ -130,4 +134,6 @@ public:
 	afx_msg void OnBnClickedButtonMainMaterialIdReport();
 	afx_msg void OnBnClickedButtonMainControlOfflineReq();
 	afx_msg void OnBnClickedButtonMainControlOnlineRemoteReq();
+	afx_msg void OnBnClickedButtonMainOp();
+	afx_msg void OnBnClickedButtonMainEnginner();
 };

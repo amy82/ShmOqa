@@ -2931,17 +2931,7 @@ void CCcdDlg::OnBnClickedButtonCcdFovDisRo()
 	g_clMandoInspLog[m_nUnit].InitData();
 
 	//if (g_FindCirclePos(m_nUnit, g_clVision.m_pImgBuff[m_nUnit][1], g_clModelData[m_nUnit].m_clSfrInfo.m_clRectCircle) == false)	//OnBnClickedButtonCcdFovDisRo
-	if (g_OpencvFindCirclePos(m_nUnit, g_clLaonGrabberWrapper[m_nUnit].m_pFrameRawBuffer, g_clModelData[m_nUnit].m_clSfrInfo.m_clRectCircle, false) == false)
-	{
-		AddLog(_T("[수동검사] 원형 마크 확인 실패"), 1, m_nUnit);
-		return;
-	}
-	g_clVision.ClearOverlay(m_nUnit);
-	if (g_clApsInsp[m_nUnit].FnShmFastCornerFind(g_clLaonGrabberWrapper[m_nUnit].m_pFrameRawBuffer) == false)		//MANUAL
-	{
-		AddLog(_T("[수동검사] FOV MARK 확인 실패"), 1, m_nUnit);
-		return;
-	}
+	
 	//g_clApsInsp[m_nUnit].func_Insp_Shm_Fov_Distortion(g_clLaonGrabberWrapper[m_nUnit].m_pFrameRawBuffer);		//MANUAL
 
 	g_clMesCommunication[m_nUnit].g_FovVertexLog(m_nUnit);	//MANUAL
@@ -4156,16 +4146,7 @@ void CCcdDlg::OnBnClickedButtonCcdFovInit()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
-	g_clVision.ClearOverlay(m_nUnit);
-	g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].m_FovSetMode = true;
 
-	m_clColorButtonFovMarkView.state = 1;
-	g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].DrawRectFov(999);
-
-	m_clColorButtonSnrMarkView.Invalidate();
-	m_clColorButtonFovMarkView.Invalidate();
-
-	g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].InitFovRoi();
 }
 
 

@@ -651,7 +651,6 @@ void CCcdMarkViewDlg::OnBnClickedButtonCcdMarkViewFind()
 		g_clMesCommunication[m_nUnit].m_dGrrAlignPos[1] = dmAlign.y;
 		g_clMesCommunication[m_nUnit].m_dGrrAlignPos[2] = dmAlign.t;
 
-		g_clMesCommunication[m_nUnit].g_Grr____Align(0);
 	}
 
 }

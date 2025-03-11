@@ -18,6 +18,7 @@ CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 CMessagePopupDlg* g_pMessageClosePopupDlg;
 int g_nPopupIndex;
 int g_nTerminalIindex;
+int g_nRunMode;		//0 = op ,1 = 엔지니어
 
 CModelList ModelList;
 CModelType g_clModelType;
@@ -56,6 +57,11 @@ CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 bool MesSpecLoadCheck;
 bool bCurrentConnect;
 
+TCHAR BASE_PATH[SIZE_OF_1K];
+TCHAR BASE_DATA_PATH[SIZE_OF_1K];
+TCHAR BASE_ALARM_PATH[SIZE_OF_1K];
+TCHAR MIU_DIR[SIZE_OF_1K];
+TCHAR FW_DIR[SIZE_OF_1K];
 //-----------------------------------------------------------------------------
 //
 //	현재 경로 구하기
@@ -115,12 +121,22 @@ bool MesDataSave(int nUnit)
 	_stprintf_s(szLog, SIZE_OF_1K, _T("[설비 SPEC SAVE]"));
 	AddLog(szLog, 0, 0);
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)			//ok
+//
+//	strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
+//#else
+//	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
+//#endif
 
-	strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
-#else
-	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
-#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
+	}
+	else
+	{
+		strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
+	}
 
 	//FILE *out;
 	//if (fopen_s(&out, strPathIni, "w"))
@@ -140,143 +156,7 @@ bool MesDataSave(int nUnit)
 }
 void MesDataLoad(int nUnit)
 {
-#if 0
-	TCHAR strReadIni1[SIZE_OF_1K] = { 0 };
-	CString strPathIni = _T("");
-	MesSpecLoadCheck = false;
 
-
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-
-	strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
-#else
-	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
-#endif
-	TCHAR	szLog[SIZE_OF_1K];
-	//FILETIME ftCt, ftLat, ftLwt;
-	//FILETIME TempTime;
-	SYSTEMTIME SystemTime;
-	//HANDLE h = CreateFile(strPathIni, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	//GetFileTime(h, &ftCt, &ftLat, &ftLwt);
-	//FileTimeToLocalFileTime(&ftCt, &TempTime);
-	//FileTimeToSystemTime(&TempTime, &SystemTime);
-	
-	_stprintf_s(szLog, SIZE_OF_1K, _T("[MES SPEC]Path:%s "), strPathIni);
-	AddLog(szLog, 0, nUnit);
-
-	//_stprintf_s(szLog, SIZE_OF_1K, _T("[CreationTime]%d-%d-%d %d:%d:%d"), SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond);
-	//AddLog(szLog, 0, nUnit);
-
-	//FileTimeToLocalFileTime(&ftLat, &TempTime);
-	//FileTimeToSystemTime(&TempTime, &SystemTime);
-
-	//_stprintf_s(szLog, SIZE_OF_1K, _T("[LastAccessTime]%d-%d-%d %d:%d:%d"), SystemTime.wYear, SystemTime.wMonth, SystemTime.wDay, SystemTime.wHour, SystemTime.wMinute, SystemTime.wSecond);
-	//AddLog(szLog, 0, nUnit);
-
-	//CloseHandle(h);
-
-	std::ifstream file(strPathIni);
-	//vector<string>mspec;
-	CString temp;
-	CString mspec;
-	CString mMaxspec;
-	int mLength = 0;
-	int mLength2 = 0;
-	int i = 0;
-	vector<string> sV1;
-	EEpromVerifyData.Reset();
-	byte bTemp[100];
-	memset(bTemp, 0x00, sizeof(bTemp));
-	if (true == file.is_open())
-	{
-		MesSpecLoadCheck = true;
-		std::string s;
-		while (file)
-		{
-			temp.Empty();
-			mspec.Empty();
-			mMaxspec.Empty();
-			getline(file, s);
-
-			for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
-			{
-				if (s.find(MesSpecList[i]) != string::npos)
-				{
-					mspec.Empty();
-					mMaxspec.Empty();
-					temp.Empty();
-					temp.Format(_T("%s"), s.c_str());
-					//
-
-					//문자 같이와, 길이가지 비교
-					AfxExtractSubString(mspec, temp, 1, _T('\t'));
-					int k1 = mspec.GetLength();
-					int k2 = MesSpecList[i].length();
-					if (k1 != k2)
-					{
-						continue;
-					}
-					//
-					
-					AfxExtractSubString(mspec, temp, 2, _T('\t'));
-					_stprintf_s(EEpromVerifyData.vMinData[i], SIZE_OF_100BYTE, mspec);
-					mLength = _tcslen(EEpromVerifyData.vMinData[i]);
-					if (mLength > 0)
-					{
-						// String to Hex
-						//eepromData[nUnit].StringToHex(MesSpecList[i], mspec, EEpromVerifyData.vMinHexData[i], 0);
-					}
-					//
-					//
-					//
-					AfxExtractSubString(mMaxspec, temp, 3, _T('\t'));
-					_stprintf_s(EEpromVerifyData.vMaxData[i], SIZE_OF_100BYTE, mMaxspec);
-					mLength2 = _tcslen(EEpromVerifyData.vMaxData[i]);
-					if (mLength2 > 0)
-					{
-						// String to Hex
-						//eepromData[nUnit].StringToHex(MesSpecList[i], mMaxspec, EEpromVerifyData.vMaxHexData[i], 1);
-					}
-					if (mLength < 1 && mLength2 < 1)
-					{
-						continue;
-					}
-					break;
-				}
-			}
-		}
-		for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
-		{
-			mLength = _tcslen(EEpromVerifyData.vMinData[i]);
-			mLength2 = _tcslen(EEpromVerifyData.vMaxData[i]);
-
-			if (mLength < 1 && mLength2 < 1)
-			{ 
-				file.close();
-				MesSpecLoadCheck = false;
-				temp.Format("[MES]%s=[%s/%s] Load Fail", MesSpecList[i].c_str(), EEpromVerifyData.vMinData[i], EEpromVerifyData.vMaxData[i]);
-				AddLog(temp, 1, UNIT_AA1, true);
-				temp.Empty();
-				mspec.Empty();
-				mMaxspec.Empty();
-				strPathIni.Empty();
-				return;
-			}
-		}
-		file.close();
-	}
-	else
-	{
-		temp.Format(_T("[ERROR] MES SPEC LOAD FAIL"));
-		AddLog(temp, 1, UNIT_AA1, true);
-		//ViewMessagePopup("INFO", temp, A_COLOR_RED); 
-	}
-
-	temp.Empty();
-	mspec.Empty();
-	mMaxspec.Empty();
-	strPathIni.Empty();
-#endif
 }
 
 
@@ -690,11 +570,20 @@ void LogSave(CString logStr , int nUnit)
 	}
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+	}
 
 
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%04d%02d%02d%02d_LogData_%s.txt"), szPath, time.wYear, time.wMonth, time.wDay, time.wHour, m_szModel);
@@ -1715,128 +1604,7 @@ int g_Get_AA_MTF(int nUnit, BYTE* RawImage, int nMode)
 //-----------------------------------------------------------------------------
 bool g_GetSfrRectROI(int nUnit, int nMode)
 {
-	int nPitch, nSizeX, nSizeY;
-	int nHeightX, nHeightY, nWidthX, nWidthY;
-	int nModelHeightX, nModelHeightY, nModelWidthX, nModelWidthY;
-	double dRadX, dRadY, dModelRadX, dModelRadY;
-	double dDegX, dDegY, dModelDegX, dModelDegY;
-	double dRadAvg;
-    TCHAR szPos[SIZE_OF_100BYTE];
-    CString sLog;
-
-	nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[nUnit][1], M_PITCH, M_NULL);
-	nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[nUnit][1], M_SIZE_X, M_NULL);	//1820
-	nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[nUnit][1], M_SIZE_Y, M_NULL);	//940
-
-    //원형마크 찾기
-	bool bCircleFind = false;
-	//bCircleFind = g_FindCirclePos(nUnit, g_clVision.m_pImgBuff[nUnit][1], g_clModelData[nUnit].m_clSfrInfo.m_clRectCircle);
-	bCircleFind = g_OpencvFindCirclePos(nUnit, g_clLaonGrabberWrapper[nUnit].m_pFrameRawBuffer, g_clModelData[nUnit].m_clSfrInfo.m_clRectCircle);	//func_Insp_Shm_Fov_Distortion
-
-	TCHAR szLog[SIZE_OF_1K];
-	if (bCircleFind  == false)
-	{ 
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[ERR] 원형 마크 확인 실패 "));
-		AddLog(szLog, 0, nUnit);
-		return false;
-	}
-
-	double dCenterPosX = 0.0;
-	double dCenterPosY = 0.0;
-	bool bPatRtn = false;
-
-
 	
-	int offsetX = ((g_clModelData[nUnit].m_nWidth / 2) - (g_clTaskWork[nUnit].m_clPtCircle[0].x + g_clTaskWork[nUnit].m_clPtCircle[1].x + g_clTaskWork[nUnit].m_clPtCircle[2].x + g_clTaskWork[nUnit].m_clPtCircle[3].x) / 4) * -1;
-	int offsetY = ((g_clModelData[nUnit].m_nHeight / 2) - (g_clTaskWork[nUnit].m_clPtCircle[0].y + g_clTaskWork[nUnit].m_clPtCircle[1].y + g_clTaskWork[nUnit].m_clPtCircle[2].y + g_clTaskWork[nUnit].m_clPtCircle[3].y) / 4) * -1;
-
-
-	int nShiftX = 0;
-	int nShiftY = 0;
-	double dCenterX = nSizeX / 2;
-	double dCenterY = nSizeY / 2;
-
-	int nSx, nSy, nEx, nEy;
-
-	int nCount;
-	int i;
-
-    nCount = MAX_LAST_INSP_COUNT;
-
-	for (i = 0; i < nCount; i++)
-	{
-		nSx = g_clModelData[nUnit].m_clSfrInfo.m_clPtOffset[i].x + offsetX; //(int)(dRealX + 0.5);
-		nSy = g_clModelData[nUnit].m_clSfrInfo.m_clPtOffset[i].y + offsetY;//(int)(dRealY + 0.5);
-		
-		nEx = (int)(nSx + g_clModelData[nUnit].m_clSfrInfo.m_nSizeX[i]);
-		nEy = (int)(nSy + g_clModelData[nUnit].m_clSfrInfo.m_nSizeY[i]);
-
-		if (nSx < 0)	nSx = 0;
-		if (nSy < 0)	nSy = 0;
-		if (nEx > nSizeX)	nEx = nSizeX - 1;
-		if (nEy > nSizeY)	nEy = nSizeY - 1;
-
-		g_clTaskWork[nUnit].m_stSfrInsp.clRect[i].left = nSx;
-		g_clTaskWork[nUnit].m_stSfrInsp.clRect[i].top = nSy;
-		g_clTaskWork[nUnit].m_stSfrInsp.clRect[i].right = nEx;
-		g_clTaskWork[nUnit].m_stSfrInsp.clRect[i].bottom = nEy;
-
-		g_clTaskWork[nUnit].m_stSfrInsp.mChartRectFind[i] = true;
-
-
-        bool rtn = false; 
-//#ifdef  CHART_FIND_PATTERN_MODE
-		if (g_clModelData[nUnit].m_nPatternChartUse == 1)
-		{
-			//패턴이미지
-			rtn = findRectPosPattern(nUnit, g_clVision.m_pImgBuff[nUnit][1], nPitch, nSizeX, nSizeY, i, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i]);
-			if (rtn)
-			{
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_MAGENTA, 1, FALSE, PS_SOLID);
-			}
-			else
-			{
-				g_clTaskWork[nUnit].m_stSfrInsp.mChartRectFind[i] = false;
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_RED, 1, FALSE, PS_SOLID);
-
-				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] #%d CHART FIND FAIL "), i);
-				AddLog(szLog, 0, nUnit);
-			}
-			//
-			if (findSmallSfrRectPos(nUnit, g_clVision.m_pImgBuff[nUnit][1], nPitch, nSizeX, nSizeY, i, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i]) == false)
-			{
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_RED, 1, FALSE, PS_DOT);
-				continue;
-			}
-		}
-		else
-		{
-			//자동찾기
-			if (g_FindRectPos2(nUnit, g_clVision.m_pImgBuff[nUnit][1], nPitch, nSizeX, nSizeY, i, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i]) == false)
-			{
-				g_clTaskWork[nUnit].m_stSfrInsp.mChartRectFind[i] = false;
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_RED, 1, FALSE, PS_SOLID);
-				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] #%d CHART FIND FAIL "), i);
-				AddLog(szLog, 0, nUnit);
-				continue;
-			}
-			else
-			{
-				
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_DARK_CYAN, 1, FALSE, PS_SOLID);//패턴 가이드 색상
-			}
-
-
-			if (g_FindSfrRectPos(nUnit, g_clVision.m_pImgBuff[nUnit][1], nPitch, nSizeX, nSizeY, i, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i]) == false)
-			{
-				g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp.clRect[i], M_COLOR_RED, 1, FALSE, PS_DOT);
-				continue;
-			}
-		}
-
-	}
-
-	//g_clVision.DrawOverlayAll(nUnit);
 
 	return true;
 }
@@ -1847,386 +1615,7 @@ bool g_GetSfrRectROI(int nUnit, int nMode)
 //-----------------------------------------------------------------------------
 bool g_FindFovPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, int nSizeY, CRect* clRectRoi)
 {
-    int maxSize = 100;
-
-    TCHAR szLog[SIZE_OF_1K];
-
-    if (pImage == NULL)
-    {
-        _stprintf_s(szLog, SIZE_OF_1K, _T("영상 버퍼가 잘못되었습니다."));
-        AddLog(szLog, 0, nUnit);
-        return false;
-    }
-
-    if (nSizeX <= 0 || nSizeY <= 0)
-    {
-        _stprintf_s(szLog, SIZE_OF_1K, _T("영상 사이즈가 잘못되었습니다. ( X : %d Y : %d )"), nSizeX, nSizeY);
-        AddLog(szLog, 0, nUnit);
-
-        return false;
-    }
-
-    int aiHistX[5000];
-    int aiHistY[5000];
-	double offsetX = g_clTaskWork[nUnit].m_dOcResultX;
-	double offsetY = g_clTaskWork[nUnit].m_dOcResultY;// *-1;
-	//double dCenterX = nSizeX / 2;
-	//double dCenterY = nSizeY / 2;
-	//int nShiftX = dCenterX - (g_clTaskWork[nUnit].m_clPtCircle[0].x + g_clTaskWork[nUnit].m_clPtCircle[1].x + g_clTaskWork[nUnit].m_clPtCircle[2].x + g_clTaskWork[nUnit].m_clPtCircle[3].x) / 4;
-	//int nShiftY = dCenterY - (g_clTaskWork[nUnit].m_clPtCircle[0].y + g_clTaskWork[nUnit].m_clPtCircle[1].y + g_clTaskWork[nUnit].m_clPtCircle[2].y + g_clTaskWork[nUnit].m_clPtCircle[3].y) / 4;
-
-
-	//int offsetX = ((g_clModelData[nUnit].m_nWidth / 2) - (g_clTaskWork[nUnit].m_clPtCircle[0].x + g_clTaskWork[nUnit].m_clPtCircle[1].x + g_clTaskWork[nUnit].m_clPtCircle[2].x + g_clTaskWork[nUnit].m_clPtCircle[3].x) / 4) * -1;
-	//int offsetY = ((g_clModelData[nUnit].m_nHeight / 2) - (g_clTaskWork[nUnit].m_clPtCircle[0].y + g_clTaskWork[nUnit].m_clPtCircle[1].y + g_clTaskWork[nUnit].m_clPtCircle[2].y + g_clTaskWork[nUnit].m_clPtCircle[3].y) / 4) * -1;
-
-
-
-	offsetX = (g_clModelData[nUnit].m_clSfrInfo.m_dFovOcX - g_clTaskWork[nUnit].m_dOcResultX) * -1;
-	offsetY = (g_clModelData[nUnit].m_clSfrInfo.m_dFovOcY - g_clTaskWork[nUnit].m_dOcResultY) * -1;
-
-	//offsetX = nShiftX * -1;
-	//offsetY = nShiftY * -1;
-
-	//CRect m_clRectFovTemp;
-	//m_clRectFovTemp = g_clModelData[nUnit].m_clSfrInfo.m_clRectFov;
-	/*clRectRoi->left += offsetX;
-	clRectRoi->right += offsetX;
-	clRectRoi->bottom += offsetY;
-	clRectRoi->top += offsetY;
-*/
-	//g_clVision.DrawMOverlayBox(nUnit,m_clRectFovTemp,M_COLOR_DARK_YELLOW, 1, FALSE, PS_SOLID);
-	//g_clVision.DrawOverlayAll(nUnit);
-
-    for (int i = 0; i < MAX_FOV_COUNT; i++)
-    {
-		clRectRoi[i].left += offsetX; 
-		clRectRoi[i].top += offsetY;
-		clRectRoi[i].right += offsetX;
-		clRectRoi[i].bottom += offsetY;
-
-        //if (i > 2 && i < 6)continue;
-		if (i > 3)continue;
-        if (clRectRoi[i].left < 0 || clRectRoi[i].top < 0 || clRectRoi[i].right > nSizeX || clRectRoi[i].bottom > nSizeY)
-        {
-            _stprintf_s(szLog, SIZE_OF_1K, _T("[마크 #%d] FOV 검색 영역이 잘못되었습니다. ( L %d,  T %d,  R %d,  B %d )"), i + 1, clRectRoi[i].left, clRectRoi[i].top, clRectRoi[i].right, clRectRoi[i].bottom);
-            AddLog(szLog, 0, nUnit);
-
-            return false;
-        }
-		 
-        int iSx, iSy, iEx, iEy;
-        int x, y, iPos;
-        int iMaxX = -1, iMinX = 9999;
-        int iMaxY = -1, iMinY = 9999;
-        int iMax_Left = -1, iMax_Right = -1, iMax_Up = -1, iMax_Down = -1;
-
-        int iMaxX2 = -1, iMinX2 = 9999;
-        int iMaxY2 = -1, iMinY2 = 9999;
-        int iMax_Left2 = -1, iMax_Right2 = -1, iMax_Up2 = -1, iMax_Down2 = -1;
-
-        int iSum;
-        int iGap;
-
-        int iSum_Left, iSum_Right;
-        int iSum_Top, iSum_Bottom;
-
-        iSx = clRectRoi[i].left;
-        iSy = clRectRoi[i].top;
-        iEx = clRectRoi[i].right;
-        iEy = clRectRoi[i].bottom;
-
-        ::memset(aiHistY, 0, sizeof(int)*(5000));
-        ::memset(aiHistX, 0, sizeof(int)*(5000));
-
-
-        /* X방향 히스토그램 */
-        for (x = iSx; x < iEx; x++)
-        {
-            iPos = iSy * nPitch + x;
-            iSum = 0;
-
-            for (y = iSy; y < iEy; y++)
-            {
-                //				iSum += (ucImage[iPos]*ucImage[iPos]);
-                iSum += (pImage[iPos]);
-                iPos += nPitch;
-            }
-
-            aiHistX[x - iSx] = iSum;
-        }
-
-        /* X방향부터 엣지 찾기 */
-        for (x = iSx + 5; x < iEx - 5; x++)
-        {
-            iSum_Left = aiHistX[x - iSx - 4] + aiHistX[x - iSx - 3] + aiHistX[x - iSx - 2] + aiHistX[x - iSx - 1];
-            iSum_Right = aiHistX[x - iSx + 4] + aiHistX[x - iSx + 3] + aiHistX[x - iSx + 2] + aiHistX[x - iSx + 1];
-
-
-            iGap = iSum_Left - iSum_Right;
-			
-            if (iGap > 800 && iGap > iMax_Left)
-            { 
-                iMax_Left = iGap;
-                iMinX = x; 
-            }
-			
-            iGap = iSum_Right - iSum_Left;
-			
-            if (iGap>800 && iGap > iMax_Right)
-            {
-                iMax_Right = iGap;
-                iMaxX = x;
-            }
-        }
-
-
-        iMax_Left = 0;
-        iMinX2 = 0;
-        int tmpSx = iMaxX - 400;
-        int tmpEx = iMinX - 30;
-        if (tmpSx < (iSx + 5))
-            tmpSx = (iSx + 5);
-        if (tmpEx >(iEx - 5))
-            tmpEx = (iSx - 5);
-
-        for (x = tmpSx; x < iMaxX; x++)
-        {
-            iSum_Left = aiHistX[x - iSx - 4] + aiHistX[x - iSx - 3] + aiHistX[x - iSx - 2] + aiHistX[x - iSx - 1];
-            iSum_Right = aiHistX[x - iSx + 4] + aiHistX[x - iSx + 3] + aiHistX[x - iSx + 2] + aiHistX[x - iSx + 1];
-
-            iGap = iSum_Left - iSum_Right;
-
-            if (iGap>800 && iGap > iMax_Left)
-            {
-                iMax_Left = iGap;
-                iMinX2 = x;
-            }
-        }
-
-
-        iMax_Right = 0;
-        iMaxX2 = 0;
-
-        tmpSx = iMinX + 30;
-        tmpEx = iMinX + 400;
-        if (tmpSx < (iSx + 5))
-            tmpSx = (iSx + 5);
-        if (tmpEx >(iEx - 5))
-            tmpEx = (iEx - 5);
-
-
-        for (x = tmpSx; x < tmpEx; x++)
-        {
-            iSum_Left = aiHistX[x - iSx - 4] + aiHistX[x - iSx - 3] + aiHistX[x - iSx - 2] + aiHistX[x - iSx - 1];
-            iSum_Right = aiHistX[x - iSx + 4] + aiHistX[x - iSx + 3] + aiHistX[x - iSx + 2] + aiHistX[x - iSx + 1];
-
-            iGap = iSum_Right - iSum_Left;
-
-			//원형마크 크게 찾느거 400에서 600으로 수정해서 해결
-			if (iGap > 1000 && iGap > iMax_Right)//if (iGap > 400 && iGap > iMax_Right)
-            {
-                iMax_Right = iGap;
-                iMaxX2 = x;
-            }
-        }
-
-
-        if (iMaxX - iMinX > 130 && iMaxX - iMinX < maxSize && iMinX > 0)
-        {
-            iMinX = iMinX;
-            iMaxX = iMaxX;
-        }
-        else if (iMaxX2 - iMinX > 130 && iMaxX2 - iMinX < maxSize && iMinX > 0)
-        {
-            iMinX = iMinX;
-            iMaxX = iMaxX2;
-        }
-        else if (iMaxX - iMinX2 > 130 && iMaxX - iMinX2 < maxSize && iMinX2 > 0)
-        {
-            iMinX = iMinX2;
-            iMaxX = iMaxX;
-        }
-
-        /* Y 방향 히스토그램 */
-        for (y = iSy; y < iEy; y++)
-        {
-            iPos = y * nPitch + iMinX;
-            iSum = 0;
-
-            for (x = iMinX; x<iMaxX; x++)
-            {
-                iSum += pImage[iPos++];
-            }
-
-            aiHistY[y - iSy] = iSum;
-        }
-
-        for (y = iSy + 5; y < iEy - 5; y++)
-        {
-            iSum_Top = aiHistY[y - iSy - 4] + aiHistY[y - iSy - 3] + aiHistY[y - iSy - 2] + aiHistY[y - iSy - 1];
-            iSum_Bottom = aiHistY[y - iSy + 4] + aiHistY[y - iSy + 3] + aiHistY[y - iSy + 2] + aiHistY[y - iSy + 1];
-
-            iGap = iSum_Top - iSum_Bottom;
-
-            if (iGap > iMax_Up)
-            {
-                iMax_Up = iGap;
-                iMinY = y;
-            }
-
-            iGap = iSum_Bottom - iSum_Top;
-
-            if (iGap > iMax_Down)
-            {
-                iMax_Down = iGap;
-                iMaxY = y;
-            }
-        }
-
-
-        if (iMinY >= iMaxY)
-        {
-            int iMinY2 = -9999;
-            int iMaxY2 = -9999;
-            int iMax_Up2 = 0;
-            int iMax_Down2 = 0;
-
-            int tmpSy = iMinY + 5;
-            int tmpEy = iEy - 5;
-
-            for (y = tmpSy; y < tmpEy; y++)
-            {
-                iSum_Top = aiHistY[y - iSy - 4] + aiHistY[y - iSy - 3] + aiHistY[y - iSy - 2] + aiHistY[y - iSy - 1];
-                iSum_Bottom = aiHistY[y - iSy + 4] + aiHistY[y - iSy + 3] + aiHistY[y - iSy + 2] + aiHistY[y - iSy + 1];
-
-                iGap = iSum_Bottom - iSum_Top;
-
-                if (iGap > iMax_Down2 && (iGap>1000))
-                {
-                    iMax_Down2 = iGap;
-                    iMaxY2 = y;
-                }
-            }
-
-
-            tmpSy = iSy + 5;
-            tmpEy = iMaxY - 5;
-
-            for (y = tmpSy; y < tmpEy; y++)
-            {
-                iSum_Top = aiHistY[y - iSy - 4] + aiHistY[y - iSy - 3] + aiHistY[y - iSy - 2] + aiHistY[y - iSy - 1];
-                iSum_Bottom = aiHistY[y - iSy + 4] + aiHistY[y - iSy + 3] + aiHistY[y - iSy + 2] + aiHistY[y - iSy + 1];
-
-                iGap = iSum_Top - iSum_Bottom;
-
-                if (iGap > iMax_Up2 && (iGap>1000))
-                {
-                    iMax_Up2 = iGap;
-                    iMinY2 = y;
-                }
-            }
-
-            if ((iMaxY - iMinY2) > 50 && (iMaxY - iMinY2) < 250)
-            {
-                iMinY = iMinY2;
-            }
-            else if ((iMaxY2 - iMinY) > 50 && (iMaxY2 - iMinY) < 250)
-            {
-                iMaxY = iMaxY2;
-            }
-        }
-        else if ((iMaxY - iMinY) > 800)
-        {
-            int iMaxY2 = -9999;
-            int iMinY2 = -9999;
-            int iMax_Up2 = 0;
-            int iMax_Down2 = 0;
-
-            int tmpSy = iMinY + 5;
-            int tmpEy = iMaxY - 5;
-
-            for (y = tmpSy; y < tmpEy; y++)
-            {
-                iSum_Top = aiHistY[y - iSy - 4] + aiHistY[y - iSy - 3] + aiHistY[y - iSy - 2] + aiHistY[y - iSy - 1];
-                iSum_Bottom = aiHistY[y - iSy + 4] + aiHistY[y - iSy + 3] + aiHistY[y - iSy + 2] + aiHistY[y - iSy + 1];
-
-                iGap = iSum_Top - iSum_Bottom;
-
-                if (iGap > iMax_Up2 && (iGap > 1000))
-                {
-                    iMax_Up2 = iGap;
-                    iMinY2 = y;
-                }
-
-                iGap = iSum_Bottom - iSum_Top;
-
-                if (iGap > iMax_Down2 && (iGap > 1000))
-                {
-                    iMax_Down2 = iGap;
-                    iMaxY2 = y;
-                }
-            }
-
-            if ((iMinY2 > 0) && ((iMaxY - iMinY2) > 50 && (iMaxY - iMinY2) < 250))
-            {
-                iMinY = iMinY2;
-            }
-            else if ((iMaxY2 > 0) && ((iMaxY2 - iMinY) > 50 && (iMaxY2 - iMinY) < 250))
-            {
-                iMaxY = iMaxY2;
-            }
-        }
-
-
-        if (iMinX > iMaxX || (iMaxX - iMinX > maxSize))
-        {
-			if (iMinY == iMaxY)
-			{
-				iMaxY += 50;
-			}
-            g_clVision.DrawMOverlayBox(nUnit, nUnit, iMinX, iMinY, iMaxX, iMaxY, M_COLOR_RED,1, FALSE, PS_SOLID);
-
-            _stprintf_s(szLog, SIZE_OF_1K, _T("[마크 #%d] 좌우 인식 위치가 비정상 입니다. (좌 %d, 우 %d)"), i + 1, iMinX, iMaxX);
-            AddLog(szLog, 0, nUnit);
-            return false;
-        }
-
-
-        if (iMinY > iMaxY || (iMaxY - iMinY > maxSize))
-        {
-            g_clVision.DrawMOverlayBox(nUnit, nUnit, iMinX, iMinY, iMaxX, iMaxY, M_COLOR_RED, 2, FALSE, PS_SOLID);
-
-            _stprintf_s(szLog, SIZE_OF_1K, _T("[마크 #%d] 상하 인식 위치가 비정상 입니다. (상 %d, 하 %d)"), i + 1, iMinY, iMaxY);
-            AddLog(szLog, 0, nUnit);
-            return false;
-        }
-
-
-        if (iMaxX < 0 || iMaxY < 0 || iMaxX > nSizeX || iMaxY > nSizeY ||
-            iMinX < 0 || iMinY < 0 || iMinX > nSizeX || iMinY > nSizeY)
-        {
-            _stprintf_s(szLog, SIZE_OF_1K, _T("[마크 #%d] Max, Min 위치를 찾지 못했습니다."), i + 1);
-            AddLog(szLog, 0, nUnit);
-            return false;
-        }
-#ifdef ON_LINE_MIL
-		g_clVision.DrawMOverlayBox(nUnit, nUnit, clRectRoi[i], M_COLOR_BLUE, 1, FALSE, PS_DOT);
-		//g_clVision.DrawMOverlayBox(nUnit, g_clModelData[nUnit].m_clSfrInfo.m_clRectFov[i], M_COLOR_GREEN, 1, FALSE, PS_DOT);
-		g_clVision.DrawMOverlayBox(nUnit, nUnit, iMinX, iMinY, iMaxX, iMaxY, M_COLOR_YELLOW, 1, FALSE, PS_SOLID);
-#endif
-        
-         
-        g_clTaskWork[nUnit].m_clPtFov[i].x = (iMaxX + iMinX) / 2;
-        g_clTaskWork[nUnit].m_clPtFov[i].y = (iMaxY + iMinY) / 2;
-		g_clTaskWork[nUnit].m_FindFovRect[i].left = iMinX;
-		g_clTaskWork[nUnit].m_FindFovRect[i].right = iMaxX;
-		g_clTaskWork[nUnit].m_FindFovRect[i].top = iMinY;
-		g_clTaskWork[nUnit].m_FindFovRect[i].bottom = iMaxY;
-
-
-        g_clVision.DrawMOverlayCross(nUnit, nUnit, g_clTaskWork[nUnit].m_clPtFov[i], 200, M_COLOR_GRAY, 1, FALSE);// TRUE); 
-
-    }
+    
     return true;
 }
 
@@ -2239,114 +1628,8 @@ bool g_FindFovPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, int 
 bool g_OpencvFindCirclePos(int m_nUnit, BYTE* ChartRawImage, CRect* clRectRoi , bool bAutoMode)		//int nPitch, int nSizeX, int nSizeY,
 {
 
-	TCHAR szLog[SIZE_OF_1K];
-	TCHAR szFilePath[SIZE_OF_1K];
-	//int nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_PITCH, M_NULL);
-	//int nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_X, M_NULL);
-	//int nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_Y, M_NULL);
-	//int iSx, iSy, iEx, iEy;
-	//int x, y, iPos;
-	//int iMaxX = -1, iMinX = 9999;
-	//int iMaxY = -1, iMinY = 9999;
-
-	//opencv 로 원형마크 찾기
-
-	BYTE* m_pBMPTempBuffer;
-	m_pBMPTempBuffer = new BYTE[g_clLaonGrabberWrapper[m_nUnit].m_pBoard->GetFrameBMPSize()];
-	memset(m_pBMPTempBuffer, 0, g_clLaonGrabberWrapper[m_nUnit].m_pBoard->GetFrameBMPSize());
-
-	ACMISSoftISP::xMakeBMP(ChartRawImage, (byte*)m_pBMPTempBuffer, g_clModelData[m_nUnit].m_nWidth, g_clModelData[m_nUnit].m_nHeight, g_clLaonGrabberWrapper[m_nUnit].dTDATASPEC_n);
-
-	Mat OrgImage(Size(g_clModelData[m_nUnit].m_nWidth, g_clModelData[m_nUnit].m_nHeight), CV_8UC3);
-	std::memcpy(OrgImage.data, (char*)m_pBMPTempBuffer, g_clModelData[m_nUnit].m_nWidth * g_clModelData[m_nUnit].m_nHeight * 3);
-
-
-	TCHAR* pszCirRow[] = {
-		_T("[0] Circle LT"), _T("[1] Circle RT"), _T("[2] Circle BL"), _T("[3] Circle BR")
-	};
-
-	for (int i = 0; i < 4; i++)
-	{
-		if (clRectRoi[i].left < 0 || clRectRoi[i].top < 0 || clRectRoi[i].right > g_clModelData[m_nUnit].m_nWidth || clRectRoi[i].bottom > g_clModelData[m_nUnit].m_nHeight)
-		{
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[마크 #%d] 원형 마크 검색 영역이 잘못되었습니다. ( L:%d, T:%d, R:%d, B:%d )"), i + 1, clRectRoi[i].left, clRectRoi[i].top, clRectRoi[i].right, clRectRoi[i].bottom);
-			AddLog(szLog, 0, m_nUnit);
-			return false;
-		}
-		Mat roiimg = OrgImage(cvRect(clRectRoi[i].left, clRectRoi[i].top, clRectRoi[i].Width(), clRectRoi[i].Height()));
-		Mat grayImg;
-		cv::cvtColor(roiimg, grayImg, cv::COLOR_BGR2GRAY);
-
-		//
-		//
-		int mdp = 1;						//dp=1이면 입력 이미지와 동일한 해상도를 사용
-		int mMinDist = grayImg.rows / 2;		// / 8;//검출된 원의 중심들 사이의 최소 거리입니다
-		int mParam1 = 200;// 200;			//캐니 에지 탐지기에 전달되는 상위 임계값입니다. 
-		int mParam2 = 10;					//중심 검출을 위한 누산기의 임계값입니다. 이 값이 작을수록 더 많은 원이 검출되며, 노이즈나 잘못된 원도 포함될 수 있습니다.
-		int mMinRadius = 10;					//검출할 원의 최소 반지름입니다.  
-		int mMaxRadius = 75;					//검출할 원의 최대 반지름입니다. 
-
-												//원찾기
-		std::vector<cv::Vec3f> circles;
-		// 가우시안 블러 적용 (노이즈 제거)
-		//cv::GaussianBlur(grayImg, grayImg, cv::Size(9, 9), 2, 2);
-
-		cv::HoughCircles(grayImg, circles, cv::HOUGH_GRADIENT, mdp, mMinDist, mParam1, mParam2, mMinRadius, mMaxRadius);
-		if (circles.empty())
-		{
-			return false;
-		}
-
-		cv::Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
-		int radius = cvRound(circles[0][2]);
-
-		g_clTaskWork[m_nUnit].m_clPtCircle[i].x = circles[0][0] + clRectRoi[i].left;
-		g_clTaskWork[m_nUnit].m_clPtCircle[i].y = circles[0][1] + clRectRoi[i].top;
-
-		g_clTaskWork[m_nUnit].m_FindCircleRect[i].left = g_clTaskWork[m_nUnit].m_clPtCircle[i].x - radius;
-		g_clTaskWork[m_nUnit].m_FindCircleRect[i].right = g_clTaskWork[m_nUnit].m_clPtCircle[i].x + radius;
-		g_clTaskWork[m_nUnit].m_FindCircleRect[i].top = g_clTaskWork[m_nUnit].m_clPtCircle[i].y - radius;
-		g_clTaskWork[m_nUnit].m_FindCircleRect[i].bottom = g_clTaskWork[m_nUnit].m_clPtCircle[i].y + radius;
-
-		g_clVision.DrawMOverlayBox(m_nUnit, m_nUnit, g_clTaskWork[m_nUnit].m_FindCircleRect[i].left, g_clTaskWork[m_nUnit].m_FindCircleRect[i].top, g_clTaskWork[m_nUnit].m_FindCircleRect[i].right, g_clTaskWork[m_nUnit].m_FindCircleRect[i].bottom, M_COLOR_GRAY, 1, FALSE, PS_SOLID);
-
-		if (bAutoMode == false)
-		{
-			_stprintf_s(szLog, SIZE_OF_1K, _T("%s x:%d , y:%d"), pszCirRow[i], g_clTaskWork[m_nUnit].m_clPtCircle[i].x, g_clTaskWork[m_nUnit].m_clPtCircle[i].y);
-			AddLog(szLog, 0, m_nUnit);
-		}
-		g_clVision.DrawMOverlayCross(m_nUnit, m_nUnit, g_clTaskWork[m_nUnit].m_clPtCircle[i], 200, M_COLOR_GRAY, 1, FALSE);// TRUE);
-
-#ifdef _DEBUG
-		if (false)//bAutoMode == false)
-		{
-			Mat img_corners;		//코너 찾기
-			cvtColor(grayImg, img_corners, COLOR_GRAY2BGR);
-
-			cv::Rect rect(circles[0][0] - radius, circles[0][1] - radius, radius * 2, radius * 2); // (x, y, width, height)
-			circle(img_corners, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-			rectangle(img_corners, rect, Scalar(0, 255, 0), 1);
-
-			_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\circle_%d.jpg"), BASE_LOG_PATH, i + 1);
-			imwrite(szFilePath, img_corners);
-
-			namedWindow("Circle Center", WINDOW_NORMAL);// WINDOW_AUTOSIZE);
-			imshow("Circle Center", img_corners);
-
-			waitKey(0);
-		}
-
-		//circles.clear();
-#endif
-	}
-
-	if (m_pBMPTempBuffer)
-	{
-		delete m_pBMPTempBuffer;
-	}
-	m_pBMPTempBuffer = NULL;
 	
-	return true;
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -2688,11 +1971,6 @@ bool g_FindCirclePos(int nUnit, unsigned char* pImage,  CRect* clRectRoi)		//int
 
 		g_clTaskWork[nUnit].m_clPtCircle[i].x = (iMaxX + iMinX) / 2;
 		g_clTaskWork[nUnit].m_clPtCircle[i].y = (iMaxY + iMinY) / 2;
-
-		g_clTaskWork[nUnit].m_FindCircleRect[i].left = iMinX;
-		g_clTaskWork[nUnit].m_FindCircleRect[i].right = iMaxX;
-		g_clTaskWork[nUnit].m_FindCircleRect[i].top = iMinY;
-		g_clTaskWork[nUnit].m_FindCircleRect[i].bottom = iMaxY;
 
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[Circle #%d] x:%d , y:%d."), i + 1, g_clTaskWork[nUnit].m_clPtCircle[i].x, g_clTaskWork[nUnit].m_clPtCircle[i].y);
 		AddLog(szLog, 0, nUnit);
@@ -3846,126 +3124,6 @@ bool g_FindSfrRectPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, 
 	return true; 
 }
 
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-bool findSmallSfrRectPos(int nUnit, unsigned char* ucImage, int pitch, int sizeX, int sizeY, int nIndex, CRect rcRoi)
-{
-    int iSfrIndex = 0;
-    int iWidth = 0;
-    int iHeight = 0;
-    int initNum = 0;
-	int nIndexLeft, nIndexRight, nIndexTop, nIndexBottom;
-    TCHAR szPos[SIZE_OF_100BYTE];
-	TCHAR szLog[SIZE_OF_1K];
-	int nTop = 0;
-	int nLeft = 0;
-
-	int boxIndex[MAX_LAST_INSP_COUNT] =
-	{
-		/*SFR_CENTER_INDEX_4,
-		MAX_SFR_INSP_COUNT - 15 , MAX_SFR_INSP_COUNT - 13,
-		MAX_SFR_INSP_COUNT - 11 , MAX_SFR_INSP_COUNT - 9,
-		MAX_SFR_INSP_COUNT - 7 , MAX_SFR_INSP_COUNT - 5,
-		MAX_SFR_INSP_COUNT - 3 , MAX_SFR_INSP_COUNT - 1,*/
-		3,5,7,9,11,13,15,17,19
-	};
-	//Top = 0 , Bottom = 1 , Left = 2 , Right = 3
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-
-#ifdef KUMI_TEST_MODE
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		0,1,2,3,			//CENTER  
-		1,3,1,2,0,3,0,2,	//4F
-		0,2,0,3,1,2,1,3
-	};
-#else
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		1,0,2,3,			//CENTER  0,1,2,3,
-		0,3,0,2,1,3,1,2,	//4F//1,3,1,2,0,3,0,2,	//4F
-		1,2,1,3,0,2,0,3//0,2,0,3,1,2,1,3
-};	
-#endif
-#else
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		0,1,2,3,			//CENTER
-		0,2,0,3,1,2,1,3,	//4F
-		1,3,1,2,0,3,0,2 };	//7F
-#endif
-	
-
-
-    if (nIndex == 0)
-    {
-        initNum = 0;
-    }
-    else
-    {
-        initNum = boxIndex[nIndex] - 1;
-    }
-    
-
-
-	int mDirect = 0;
-
-	for (iSfrIndex = initNum; iSfrIndex <= boxIndex[nIndex]; iSfrIndex++)
-	{
-		mDirect = g_clModelData[nUnit].m_nDirection[iSfrIndex];
-		if (mDirect == SFR_ROI_HORIZONTAL)
-		{
-			iWidth = g_clModelData[nUnit].m_nRoiSizeX;
-			iHeight = g_clModelData[nUnit].m_nRoiSizeY;
-		}
-		else
-		{
-			iWidth = g_clModelData[nUnit].m_nRoiSizeY;
-			iHeight = g_clModelData[nUnit].m_nRoiSizeX;
-		}
-
-
-		if (roiPos[iSfrIndex] == 0)	//TOP,H
-		{
-			nTop = (rcRoi.top - (iHeight / 2));
-			nLeft = (rcRoi.left + rcRoi .Width() /2 - (iWidth / 2));
-		}else if (roiPos[iSfrIndex] == 1)	//BOTTOM,H
-		{
-			nTop = (rcRoi.bottom - (iHeight / 2));
-			nLeft = (rcRoi.left + rcRoi.Width() / 2 - (iWidth / 2));
-		}
-		else if (roiPos[iSfrIndex] == 2)	//LEFT,V
-		{
-			nTop = (rcRoi.top + rcRoi.Height() / 2 - (iHeight / 2));
-			nLeft = (rcRoi.left - (iWidth / 2));
-		}
-		else if (roiPos[iSfrIndex] == 3)	//RIGHR, V
-		{
-			nTop = (rcRoi.top + rcRoi.Height() / 2 - (iHeight / 2));
-			nLeft = (rcRoi.right - (iWidth / 2));
-		}
-
-		g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].left = nLeft + g_clModelData[nUnit].m_MTF_ROI_Pos[1][iSfrIndex].x;
-		g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].top = nTop + g_clModelData[nUnit].m_MTF_ROI_Pos[1][iSfrIndex].y;
-
-		g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].right = g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].left + (iWidth);
-		g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].bottom = g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].top + (iHeight);
-
-		g_clVision.DrawMOverlayBox(nUnit, nUnit, g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex], M_COLOR_YELLOW, 1, FALSE);
-		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), iSfrIndex);
-
-		g_clVision.DrawMOverlayText(nUnit, g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].left + 10, g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex].top + 10, szPos, M_COLOR_GREEN, _T("Arial"), 10, 12, FALSE);
-
-
-		if (g_clTaskWork[nUnit].m_nAutoFlag != MODE_AUTO)
-		{
-			g_clVision.SaveSfrImage(nUnit, ucImage, pitch, iWidth, iHeight, iSfrIndex, g_clTaskWork[nUnit].m_stSfrInsp._64_Sfr_Rect[iSfrIndex]);
-		}
-    }
-     
-    //
-    return true;
-}
 
 bool findRectPosPattern(int nUnit, unsigned char* ucImage, int pitch, int sizeX, int sizeY, int index, CRect& rcRoi)
 {
@@ -4063,8 +3221,8 @@ bool CenterFieldPatternMatching(int nUnit, double &dCenterPosX, double &dCenterP
 #endif
 	MpatFindModel(g_clVision.m_MilCcdProcChild[nUnit][2], g_clVision.FieldPatternImage[nUnit][0], g_clVision.FieldPatternResult[nUnit][0]);
 
-	double px;
-	double dAngle;
+	double px = 0.0;
+	double dAngle = 0.0;
 	if (MpatGetNumber(g_clVision.FieldPatternResult[nUnit][0], M_NULL) == 1L)
 	{
 		MpatGetResult(g_clVision.FieldPatternResult[nUnit][0], M_POSITION_X, &Center.x);
@@ -5812,13 +4970,22 @@ bool g_SaveLGITLog(int nUnit, TCHAR *lgitName, string lgitTitle, string lgitData
         CreateDirectory(szPath, NULL);
 
 	//.c_str()
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//
+//#else
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//
+//#endif
 
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-
-#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+	}
+	else
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+	}
 
     if (clFinder.FindFile(szFilePath) == TRUE)
     {
@@ -5899,7 +5066,7 @@ void fileDelete(CString delFolder)
 {
 	BOOL bContinue = FALSE;
 	CFileFind finder;
-	BOOL IsFind;
+	BOOL IsFind = FALSE;
 
 	if (delFolder.Right(1) != _T("\\"))
 		delFolder += _T("\\");

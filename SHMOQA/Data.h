@@ -281,13 +281,13 @@ public:
 	double m_dSfrOcX;
 	double m_dSfrOcY;
 
-    CRect m_clRectFov[MAX_FOV_COUNT];
+    //CRect m_clRectFov[MAX_FOV_COUNT];
    // CPoint m_clPtFov[MAX_FOV_COUNT];
-	CPoint m_clPtFovOffset[MAX_FOV_COUNT];
+	//CPoint m_clPtFovOffset[MAX_FOV_COUNT];
 
 
-	int m_nFovSizeX[MAX_FOV_COUNT];
-	int m_nFovSizeY[MAX_FOV_COUNT];
+	//int m_nFovSizeX[MAX_FOV_COUNT];
+	//int m_nFovSizeY[MAX_FOV_COUNT];
 
 	double m_dFovOcX;
 	double m_dFovOcY;
@@ -894,14 +894,14 @@ public:
 
 	bool m_bRecvMesBcr;				//mes bcr ¼ö½Å ¿©ºÎ.
 
-	CRect m_FindCircleRect[MAX_FOV_COUNT];
-	CRect m_FindFovRect[MAX_FOV_COUNT];
+	//CRect m_FindCircleRect[MAX_FOV_COUNT];
+	//CRect m_FindFovRect[MAX_FOV_COUNT];
     CPoint m_clPtCircle[4];
 	CDMPoint m_clPtChartOc;
 
 
-    CPoint m_clPtFov[MAX_FOV_COUNT];
-    CPoint m_clPtSnr[MAX_FOV_COUNT];
+    //CPoint m_clPtFov[MAX_FOV_COUNT];
+    //CPoint m_clPtSnr[MAX_FOV_COUNT];
 	double m_dFOV[5];
 
 	double m_dOpticalPosX;
@@ -1090,9 +1090,9 @@ public:
 
 
 
-	CRectPos m_ChartVertex[50];	//±è¼ººÀ Ã¥ÀÓ SHM¸ðµ¨»ç¿ë Â÷Æ® ²ÀÁþÁ¡ ÁÂÇ¥ 23°³ »ç¿ë
+	//CRectPos m_ChartVertex[50];	//±è¼ººÀ Ã¥ÀÓ SHM¸ðµ¨»ç¿ë Â÷Æ® ²ÀÁþÁ¡ ÁÂÇ¥ 23°³ »ç¿ë
 
-	CPoint m_ShmFovPoint[MAX_FOV_FIND_COUNT];
+	//CPoint m_ShmFovPoint[MAX_FOV_FIND_COUNT];
 	CString		m_sI2C;				//TestPattern °Ë»ç Æ²¸° °¹¼ö
 	bool m_TpTestResult[2];
 	//-------------------------------------------------------------------------------------

@@ -226,6 +226,7 @@ private:
 	bool SkipLog(CString strLog);
 
 public:
+	void MainTitleSet(int index);
 	bool m_bMasterModeState[2];
 	int m_bCamState[2];
 private:

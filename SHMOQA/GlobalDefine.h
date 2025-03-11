@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-#define         NORINDA_MODE
+//#define         NORINDA_MODE
 //
 //
 //
@@ -28,7 +28,8 @@
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250311_3")				//통합 1차 완료
+#define				VER_STR										_T("250311_1")				//배포
+//#define				VER_STR										_T("250311_3")				//통합 1차 완료
 //#define				VER_STR										_T("250311_2")			//aps branch add , 모델 통합 시작
 //#define				VER_STR										_T("250311_1")			//home branch add
 //#define				VER_STR										_T("250226_1")			//LAST

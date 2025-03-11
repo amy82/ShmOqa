@@ -259,6 +259,8 @@ void CUbiGem::OnGEMDisconnected(LPCTSTR strIpAddress, int nPortNo)
 	UbisamAddLog(strLog);
 
 	UpdateDialogTitle();
+
+	g_pCarAABonderDlg->m_clMainDlg.setControlState(-1);
 }
 void CUbiGem::OnGEMSelected(LPCTSTR strIpAddress, int nPortNo)
 {

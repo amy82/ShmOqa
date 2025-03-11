@@ -1415,7 +1415,7 @@ void CAutoInspDlg::InitCtrl()
         m_clColorStaticVersion[i].SetFontBold(TRUE);
         m_clColorStaticVersion[i].SetFont(&m_clFontMid);
         m_clColorStaticVersion[i].SetBorder(FALSE);
-        m_clColorStaticVersion[i].SetFontSize(20);
+        m_clColorStaticVersion[i].SetFontSize(18);
 
 		//m_clColorStaticVersion[i].SetWindowText(VER_STR);
 
@@ -1604,12 +1604,12 @@ void CAutoInspDlg::MainTitleSet(int index)
 	CString strtemp;
 	if (index == 1)
 	{
-		strtemp.Format("FRONT EOL %s", VER_STR);		//100
+		strtemp.Format("[100]FRONT EOL %s", VER_STR);		//100
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	else
 	{
-		strtemp.Format("OHC EOL %s", VER_STR);			//150
+		strtemp.Format("[150]OHC EOL %s", VER_STR);			//150
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	m_clColorStaticVersion[0].Invalidate();

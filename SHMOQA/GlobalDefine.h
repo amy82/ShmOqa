@@ -28,7 +28,8 @@
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
+#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
+//#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
 //#define				VER_STR										_T("250311_1")				//배포
 //#define				VER_STR										_T("250311_3")				//통합 1차 완료
 //#define				VER_STR										_T("250311_2")			//aps branch add , 모델 통합 시작

@@ -28,7 +28,8 @@
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //====================================================================================================
-#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
+#define				VER_STR										_T("250401_1")				////바코드 체크 삭제 조현선 선임 요청 250401 , spec load 버튼 삭제
+//#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
 //#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
 //#define				VER_STR										_T("250311_1")				//배포
 //#define				VER_STR										_T("250311_3")				//통합 1차 완료
